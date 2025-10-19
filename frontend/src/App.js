@@ -206,25 +206,19 @@ function App() {
             {goldOunceSources.map((source, idx) => {
               const xauRate = source.rates['XAU'];
               
-              // Calculate difference between Istanbul and London
-              let buyDiff = 0;
+              // Calculate sell difference between Istanbul and London
               let sellDiff = 0;
-              let buyDiffPercent = 0;
               let sellDiffPercent = 0;
               
               if (idx === 0 && goldOunceSources[1]?.rates['XAU']) {
                 // Istanbul - compare with London
                 const londonRate = goldOunceSources[1].rates['XAU'];
-                buyDiff = (xauRate.buy - londonRate.buy).toFixed(2);
                 sellDiff = (xauRate.sell - londonRate.sell).toFixed(2);
-                buyDiffPercent = ((buyDiff / londonRate.buy) * 100).toFixed(3);
                 sellDiffPercent = ((sellDiff / londonRate.sell) * 100).toFixed(3);
               } else if (idx === 1 && goldOunceSources[0]?.rates['XAU']) {
                 // London - compare with Istanbul
                 const istanbulRate = goldOunceSources[0].rates['XAU'];
-                buyDiff = (xauRate.buy - istanbulRate.buy).toFixed(2);
                 sellDiff = (xauRate.sell - istanbulRate.sell).toFixed(2);
-                buyDiffPercent = ((buyDiff / istanbulRate.buy) * 100).toFixed(3);
                 sellDiffPercent = ((sellDiff / istanbulRate.sell) * 100).toFixed(3);
               }
               
@@ -251,25 +245,14 @@ function App() {
                         </div>
                       </div>
                       
-                      {(buyDiff !== 0 || sellDiff !== 0) && (
+                      {sellDiff !== 0 && (
                         <div className="gold-spread">
-                          <div className="spread-row">
-                            <span className="spread-label">Alış Farkı:</span>
-                            <div className="spread-values">
-                              <span className={`spread-amount ${buyDiff > 0 ? 'positive' : 'negative'}`}>
-                                {buyDiff > 0 ? '+' : ''}${buyDiff}
-                              </span>
-                              <span className="spread-percent">({buyDiff > 0 ? '+' : ''}{buyDiffPercent}%)</span>
-                            </div>
-                          </div>
-                          <div className="spread-row">
-                            <span className="spread-label">Satış Farkı:</span>
-                            <div className="spread-values">
-                              <span className={`spread-amount ${sellDiff > 0 ? 'positive' : 'negative'}`}>
-                                {sellDiff > 0 ? '+' : ''}${sellDiff}
-                              </span>
-                              <span className="spread-percent">({sellDiff > 0 ? '+' : ''}{sellDiffPercent}%)</span>
-                            </div>
+                          <span className="spread-label">Satış Farkı:</span>
+                          <div className="spread-values">
+                            <span className={`spread-amount ${sellDiff > 0 ? 'positive' : 'negative'}`}>
+                              {sellDiff > 0 ? '+' : ''}${sellDiff}
+                            </span>
+                            <span className="spread-percent">({sellDiff > 0 ? '+' : ''}{sellDiffPercent}%)</span>
                           </div>
                         </div>
                       )}
