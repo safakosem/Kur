@@ -298,8 +298,10 @@ async def scrape_carsidoviz():
             raise Exception("Failed to load page")
         
         rates = {}
-        rows = soup.find_all('tr')
         
+        # Try multiple strategies to find rates
+        # Strategy 1: Look in table rows
+        rows = soup.find_all('tr')
         for row in rows:
             cols = row.find_all(['td', 'th'])
             
@@ -322,6 +324,69 @@ async def scrape_carsidoviz():
                                 logger.info(f"Carsi Doviz - {currency}: Buy={buy}, Sell={sell}")
                         except (ValueError, AttributeError):
                             continue
+        
+        # Strategy 2: Look for <li> elements like Hakan Döviz
+        if not rates:
+            lis = soup.find_all('li')
+            for li in lis:
+                text = li.get_text(strip=True)
+                
+                for currency in ['USD/TRY', 'EUR/TRY', 'GBP/TRY', 'CHF/TRY']:
+                    if currency in text:
+                        remaining = text.replace(currency, '')
+                        parts = remaining.split(',')
+                        
+                        if len(parts) >= 2:
+                            try:
+                                buy_str = parts[0] + '.' + parts[1][:4] if len(parts[1]) >= 4 else parts[0]
+                                
+                                if len(parts[1]) > 4:
+                                    sell_part1 = parts[1][4:]
+                                    sell_str = sell_part1
+                                    if len(parts) > 2:
+                                        sell_str = sell_part1 + '.' + parts[2][:4]
+                                else:
+                                    sell_str = parts[1] if len(parts) > 1 else buy_str
+                                
+                                buy = float(buy_str.replace(',', '.'))
+                                sell = float(sell_str.replace(',', '.'))
+                                
+                                curr_code = currency.split('/')[0]
+                                
+                                if buy > 0 and sell > 0 and curr_code not in rates:
+                                    rates[curr_code] = ExchangeRate(
+                                        currency=curr_code,
+                                        buy=buy,
+                                        sell=sell
+                                    )
+                                    logger.info(f"Carsi Doviz - {curr_code}: Buy={buy}, Sell={sell}")
+                            except (ValueError, AttributeError, IndexError):
+                                continue
+        
+        # Strategy 3: Look in divs with class containing 'price' or 'currency'
+        if not rates:
+            all_divs = soup.find_all('div')
+            for div in all_divs:
+                text = div.get_text(strip=True)
+                for currency in ['USD', 'EUR', 'GBP', 'CHF', 'XAU']:
+                    if currency in text:
+                        # Try to extract numbers nearby
+                        import re
+                        numbers = re.findall(r'\d+[.,]\d+', text)
+                        if len(numbers) >= 2:
+                            try:
+                                buy = float(numbers[0].replace(',', '.'))
+                                sell = float(numbers[1].replace(',', '.'))
+                                if buy > 0 and sell > 0 and currency not in rates:
+                                    rates[currency] = ExchangeRate(
+                                        currency=currency,
+                                        buy=buy,
+                                        sell=sell
+                                    )
+                                    logger.info(f"Carsi Doviz - {currency}: Buy={buy}, Sell={sell}")
+                                    break
+                            except (ValueError, IndexError):
+                                continue
         
         return SourceRates(
             source="Çarşı Döviz",
