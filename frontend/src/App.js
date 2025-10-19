@@ -208,6 +208,14 @@ function App() {
               Hesap Makinesi
             </Button>
             <Button
+              onClick={() => window.open('/downloads.html', '_blank')}
+              variant="outline"
+              className="download-page-btn"
+              data-testid="download-page-button"
+            >
+              📥 İndir
+            </Button>
+            <Button
               onClick={() => fetchRates(true)}
               disabled={refreshing}
               className="refresh-btn"
