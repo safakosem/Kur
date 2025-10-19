@@ -133,7 +133,9 @@ function App() {
 
       {/* Main Content - Compact Table View */}
       <main className="main-content" data-testid="main-content">
+        {/* Main Currency Exchange Rates */}
         <div className="rates-table-container">
+          <div className="table-title">Döviz Kurları</div>
           <table className="rates-table">
             <thead>
               <tr>
@@ -149,7 +151,7 @@ function App() {
               </tr>
             </thead>
             <tbody>
-              {rates?.sources?.map((source, idx) => (
+              {mainSources.map((source, idx) => (
                 <tr key={idx} className="source-row" data-testid={`source-row-${source.source.replace(/\s+/g, '-')}`}>
                   <td className="source-cell">
                     <div className="source-name">{source.source}</div>
@@ -195,6 +197,55 @@ function App() {
               ))}
             </tbody>
           </table>
+        </div>
+
+        {/* Gold Ounce Rates - Separate Section */}
+        <div className="gold-ounce-section">
+          <div className="table-title">Altın Ons Kurları (XAU/USD)</div>
+          <div className="gold-cards">
+            {goldOunceSources.map((source, idx) => {
+              const xauRate = source.rates['XAU'];
+              const spread = xauRate ? (xauRate.sell - xauRate.buy).toFixed(2) : 0;
+              const spreadPercent = xauRate ? ((spread / xauRate.buy) * 100).toFixed(3) : 0;
+              
+              return (
+                <div key={idx} className="gold-card" data-testid={`gold-card-${idx}`}>
+                  <div className="gold-card-header">
+                    <h3 className="gold-source-name">{source.source}</h3>
+                    <div className={`source-status ${source.status}`}>
+                      {source.status === 'success' ? '●' : '○'}
+                    </div>
+                  </div>
+                  
+                  {xauRate ? (
+                    <div className="gold-card-content">
+                      <div className="gold-rates">
+                        <div className="gold-rate-item">
+                          <span className="gold-rate-label">Alış</span>
+                          <span className="gold-rate-value">${xauRate.buy.toFixed(2)}</span>
+                        </div>
+                        <div className="gold-rate-divider"></div>
+                        <div className="gold-rate-item">
+                          <span className="gold-rate-label">Satış</span>
+                          <span className="gold-rate-value">${xauRate.sell.toFixed(2)}</span>
+                        </div>
+                      </div>
+                      
+                      <div className="gold-spread">
+                        <div className="spread-label">Fark</div>
+                        <div className="spread-values">
+                          <span className="spread-amount">${spread}</span>
+                          <span className="spread-percent">(%{spreadPercent})</span>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="no-data">Veri yok</div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
 
         <div className="legend">
