@@ -380,6 +380,12 @@ body {
   align-items: center;
 }
 
+.spread-label-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
 .spread-label {
   font-size: 0.875rem;
   font-weight: 600;
@@ -409,6 +415,26 @@ body {
   font-size: 0.875rem;
   font-weight: 600;
   color: #9ca3af;
+}
+
+.spread-try {
+  display: flex;
+  align-items: center;
+  padding-left: 1.5rem;
+  border-left: 2px solid #d4a574;
+}
+
+.spread-try-amount {
+  font-size: 1.75rem;
+  font-weight: 700;
+}
+
+.spread-try-amount.positive {
+  color: #dc2626;
+}
+
+.spread-try-amount.negative {
+  color: #16a34a;
 }
 
 /* Responsive */
