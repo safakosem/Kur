@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download Döviz Karşılaştırma - Desktop Apps</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #fdfbf7 0%, #f8f4ec 100%);
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            max-width: 900px;
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            color: #b8860b;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-align: center;
+            background: linear-gradient(135deg, #b8860b 0%, #d4a574 50%, #daa520 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 1.1rem;
+        }
+        
+        .download-section {
+            margin: 30px 0;
+        }
+        
+        .platform-card {
+            background: linear-gradient(135deg, #fef5e7 0%, #fdebd0 100%);
+            border: 2px solid #d4a574;
+            border-radius: 12px;
+            padding: 30px;
+            margin: 20px 0;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .platform-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(212, 165, 116, 0.3);
+        }
+        
+        .platform-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .platform-icon {
+            font-size: 3rem;
+            margin-right: 20px;
+        }
+        
+        .platform-info h2 {
+            color: #b8860b;
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+        
+        .platform-info p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .download-btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #d4a574 0%, #b8860b 100%);
+            color: white;
+            padding: 15px 40px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(184, 134, 11, 0.3);
+            border: none;
+            cursor: pointer;
+        }
+        
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(184, 134, 11, 0.4);
+        }
+        
+        .file-info {
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: #555;
+        }
+        
+        .file-info strong {
+            color: #b8860b;
+        }
+        
+        .instructions {
+            background: #e8f4f8;
+            border-left: 4px solid #2196F3;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 4px;
+        }
+        
+        .instructions h3 {
+            color: #2196F3;
+            margin-bottom: 10px;
+        }
+        
+        .instructions ol {
+            margin-left: 20px;
+        }
+        
+        .instructions li {
+            margin: 8px 0;
+            line-height: 1.6;
+        }
+        
+        .note {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .note strong {
+            color: #856404;
+        }
+        
+        .back-link {
+            text-align: center;
+            margin-top: 30px;
+        }
+        
+        .back-link a {
+            color: #b8860b;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📥 Download Desktop Apps</h1>
+        <p class="subtitle">Döviz Karşılaştırma - Exchange Rate Comparison</p>
+        
+        <div class="download-section">
+            <!-- Windows Download -->
+            <div class="platform-card">
+                <div class="platform-header">
+                    <div class="platform-icon">🪟</div>
+                    <div class="platform-info">
+                        <h2>Windows Application</h2>
+                        <p>For Windows 10/11 (ARM64)</p>
+                    </div>
+                </div>
+                
+                <p style="margin-bottom: 20px;">
+                    Portable Windows application - no installation required!
+                </p>
+                
+                <div class="file-info">
+                    <strong>📦 File:</strong> doviz-windows-app.tar.gz<br>
+                    <strong>📊 Size:</strong> 155 MB (compressed)<br>
+                    <strong>💻 Contains:</strong> Döviz Karşılaştırma.exe + dependencies
+                </div>
+                
+                <div class="instructions">
+                    <h3>Installation Instructions:</h3>
+                    <ol>
+                        <li>Download the file from: <code>/app/frontend/dist/doviz-windows-app.tar.gz</code></li>
+                        <li>Extract the archive using 7-Zip or WinRAR</li>
+                        <li>Navigate to <code>win-arm64-unpacked</code> folder</li>
+                        <li>Double-click <code>Döviz Karşılaştırma.exe</code> to run</li>
+                    </ol>
+                </div>
+            </div>
+            
+            <!-- Linux Download -->
+            <div class="platform-card">
+                <div class="platform-header">
+                    <div class="platform-icon">🐧</div>
+                    <div class="platform-info">
+                        <h2>Linux Application</h2>
+                        <p>For Linux (ARM64)</p>
+                    </div>
+                </div>
+                
+                <p style="margin-bottom: 20px;">
+                    Portable Linux application for ARM64 systems
+                </p>
+                
+                <div class="file-info">
+                    <strong>📦 File:</strong> doviz-linux-app.tar.gz<br>
+                    <strong>📊 Size:</strong> 145 MB (compressed)<br>
+                    <strong>💻 Contains:</strong> doviz-karsilastirma executable + dependencies
+                </div>
+                
+                <div class="instructions">
+                    <h3>Installation Instructions:</h3>
+                    <ol>
+                        <li>Download the file from: <code>/app/frontend/dist/doviz-linux-app.tar.gz</code></li>
+                        <li>Extract: <code>tar -xzf doviz-linux-app.tar.gz</code></li>
+                        <li>Navigate to <code>linux-arm64-unpacked</code> folder</li>
+                        <li>Run: <code>./doviz-karsilastirma</code></li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+        
+        <div class="note">
+            <strong>⚠️ Important Notes:</strong>
+            <ul style="margin-left: 20px; margin-top: 10px;">
+                <li>These are <strong>ARM64</strong> builds (for Apple Silicon, Raspberry Pi, etc.)</li>
+                <li>For Intel/AMD (x64) systems, you'll need to build separately</li>
+                <li>Windows may show "Unknown Publisher" warning - click "More info" → "Run anyway"</li>
+                <li>On Linux, you may need to make the file executable: <code>chmod +x doviz-karsilastirma</code></li>
+            </ul>
+        </div>
+        
+        <div class="note" style="background: #d4edda; border-left-color: #28a745;">
+            <strong>💡 Alternative: Use PWA (Recommended for Mobile)</strong>
+            <p style="margin-top: 10px;">
+                Don't want to download? Use the Progressive Web App (PWA) instead!<br>
+                Open the app in your browser and click "Install" or "Add to Home Screen"
+            </p>
+        </div>
+        
+        <div class="back-link">
+            <a href="/">← Back to Application</a> | 
+            <a href="/user-guide.html">📖 User Guide</a>
+        </div>
+    </div>
+</body>
+</html>
