@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Döviz Karşılaştırma - Kullanım Kılavuzu</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #fdfbf7 0%, #f8f4ec 100%);
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            color: #b8860b;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-align: center;
+            background: linear-gradient(135deg, #b8860b 0%, #d4a574 50%, #daa520 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .version {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 0.9rem;
+        }
+        
+        h2 {
+            color: #b8860b;
+            font-size: 1.8rem;
+            margin-top: 40px;
+            margin-bottom: 15px;
+            border-bottom: 3px solid #d4a574;
+            padding-bottom: 10px;
+        }
+        
+        h3 {
+            color: #d4a574;
+            font-size: 1.3rem;
+            margin-top: 25px;
+            margin-bottom: 10px;
+        }
+        
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+        
+        ul, ol {
+            margin-left: 30px;
+            margin-bottom: 15px;
+        }
+        
+        li {
+            margin-bottom: 8px;
+        }
+        
+        .feature-box {
+            background: linear-gradient(135deg, #fef5e7 0%, #fdebd0 100%);
+            border: 2px solid #d4a574;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .feature-box h3 {
+            margin-top: 0;
+            color: #b8860b;
+        }
+        
+        .info-box {
+            background: #e8f4f8;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        
+        .success-box {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        th {
+            background: linear-gradient(135deg, #b8860b 0%, #d4a574 100%);
+            color: white;
+            font-weight: 600;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #d4a574 0%, #b8860b 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            margin: 10px 5px;
+            transition: all 0.3s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(184, 134, 11, 0.3);
+        }
+        
+        .toc {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .toc h2 {
+            margin-top: 0;
+            font-size: 1.5rem;
+        }
+        
+        .toc ul {
+            list-style: none;
+            margin-left: 0;
+        }
+        
+        .toc a {
+            color: #b8860b;
+            text-decoration: none;
+        }
+        
+        .toc a:hover {
+            text-decoration: underline;
+        }
+        
+        @media print {
+            body {
+                background: white;
+            }
+            
+            .container {
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Döviz Karşılaştırma</h1>
+        <p class="version">Kullanım Kılavuzu - Versiyon 1.0.0</p>
+        
+        <div class="toc">
+            <h2>İçindekiler</h2>
+            <ul>
+                <li><a href="#giris">1. Giriş</a></li>
+                <li><a href="#ozellikler">2. Özellikler</a></li>
+                <li><a href="#kurulum">3. Kurulum</a></li>
+                <li><a href="#kullanim">4. Kullanım</a></li>
+                <li><a href="#hesap-makinesi">5. Hesap Makinesi</a></li>
+                <li><a href="#pwa">6. Mobil Cihazlara Kurulum (PWA)</a></li>
+                <li><a href="#desktop">7. Masaüstü Uygulaması</a></li>
+                <li><a href="#sorun-giderme">8. Sorun Giderme</a></li>
+            </ul>
+        </div>
+        
+        <h2 id="giris">1. Giriş</h2>
+        <p>
+            Döviz Karşılaştırma uygulaması, Türkiye'deki farklı döviz bürolarından anlık olarak döviz 
+            ve altın fiyatlarını çekerek karşılaştırmanızı sağlayan bir web ve masaüstü uygulamasıdır.
+        </p>
+        
+        <div class="success-box">
+            <strong>✨ Neden Bu Uygulama?</strong><br>
+            Farklı döviz bürolarının fiyatlarını tek bir ekranda görüp en iyi fiyatı kolayca bulabilirsiniz.
+        </div>
+        
+        <h2 id="ozellikler">2. Özellikler</h2>
+        
+        <div class="feature-box">
+            <h3>🔄 Anlık Kurlar</h3>
+            <p>USD, EUR, GBP, CHF ve XAU (Altın) kurlarını gerçek zamanlı olarak görüntüleyin.</p>
+        </div>
+        
+        <div class="feature-box">
+            <h3>📍 Dört Farklı Kaynak</h3>
+            <ul>
+                <li>Ahlatcı Döviz</li>
+                <li>Harem Altın</li>
+                <li>Hakan Döviz</li>
+                <li>Çarşı Döviz</li>
+            </ul>
+        </div>
+        
+        <div class="feature-box">
+            <h3>🏆 En İyi Kur Göstergesi</h3>
+            <p>En iyi alış ve satış kurları yeşil renkte vurgulanır.</p>
+        </div>
+        
+        <div class="feature-box">
+            <h3>⚡ Otomatik Yenileme</h3>
+            <p>1 saniyede bir otomatik olarak kurlar güncellenir (kapatılabilir).</p>
+        </div>
+        
+        <div class="feature-box">
+            <h3>🪙 Altın Ons Kurları</h3>
+            <p>İstanbul ve Londra altın ons fiyatlarını karşılaştırın, farkları görün.</p>
+        </div>
+        
+        <div class="feature-box">
+            <h3>🧮 Hesap Makinesi</h3>
+            <p>Yerleşik hesap makinesi ile hızlı hesaplamalar yapın.</p>
+        </div>
+        
+        <div class="feature-box">
+            <h3>📱 Mobil Uyuyumlu</h3>
+            <p>Telefon ve tabletlerde mükemmel çalışır. PWA olarak kurulabilir.</p>
+        </div>
+        
+        <div class="feature-box">
+            <h3>💻 Masaüstü Uygulaması</h3>
+            <p>Windows ve Mac için bağımsız masaüstü uygulaması.</p>
+        </div>
+        
+        <h2 id="kurulum">3. Kurulum</h2>
+        
+        <h3>3.1. Web Tarayıcısından Kullanım</h3>
+        <p>Herhangi bir kurulum gerektirmez. Web tarayıcınızdan direkt olarak kullanabilirsiniz:</p>
+        <ol>
+            <li>Web tarayıcınızı açın (Chrome, Firefox, Safari, Edge vb.)</li>
+            <li>Uygulama adresine gidin</li>
+            <li>Kullanmaya başlayın!</li>
+        </ol>
+        
+        <div class="info-box">
+            <strong>💡 İpucu:</strong> En iyi deneyim için Google Chrome veya Microsoft Edge kullanmanızı öneririz.
+        </div>
+        
+        <h3>3.2. Mobil Cihazlara PWA Kurulumu</h3>
+        <p>Uygulamayı telefonunuza kurarak uygulama gibi kullanabilirsiniz. Detaylar için 
+        <a href="#pwa">PWA bölümüne</a> bakın.</p>
+        
+        <h3>3.3. Masaüstü Uygulaması Kurulumu</h3>
+        <p>Windows veya Mac bilgisayarınıza kurulum için 
+        <a href="#desktop">Masaüstü bölümüne</a> bakın.</p>
+        
+        <h2 id="kullanim">4. Kullanım</h2>
+        
+        <h3>4.1. Ana Ekran</h3>
+        <p>Uygulama açıldığında şunları göreceksiniz:</p>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Bölüm</th>
+                    <th>Açıklama</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Başlık</strong></td>
+                    <td>Döviz Karşılaştırma ve son güncelleme zamanı</td>
+                </tr>
+                <tr>
+                    <td><strong>Butonlar</strong></td>
+                    <td>Otomatik Yenileme, Hesap Makinesi, Yenile</td>
+                </tr>
+                <tr>
+                    <td><strong>Döviz Kurları Tablosu</strong></td>
+                    <td>Tüm döviz büroların kurları bir arada</td>
+                </tr>
+                <tr>
+                    <td><strong>Altın Ons Bölümü</strong></td>
+                    <td>İstanbul ve Londra altın ons fiyatları</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <h3>4.2. Döviz Kurları Okuma</h3>
+        <p>Tablodaki her satır bir döviz bürosunu temsil eder:</p>
+        <ul>
+            <li><strong>A:</strong> Alış kuru (döviz bürosunun dövizi sizden alış fiyatı)</li>
+            <li><strong>S:</strong> Satış kuru (döviz bürosunun size dövizi satış fiyatı)</li>
+            <li><strong>Yeşil rakamlar:</strong> En iyi kur (en düşük alış veya en yüksek satış)</li>
+            <li><strong>● (Yeşil nokta):</strong> Kaynak başarıyla veri çekti</li>
+            <li><strong>○ (Gri nokta):</strong> Kaynak şu an erişilemiyor</li>
+        </ul>
+        
+        <div class="info-box">
+            <strong>💡 İpucu:</strong> Döviz almak istiyorsanız "Alış" kuruna, satmak istiyorsanız "Satış" kuruna bakın.
+        </div>
+        
+        <h3>4.3. Otomatik Yenileme</h3>
+        <p>"Otomatik Yenileme Açık" butonu yeşil görünüyorsa kurlar 1 saniyede bir otomatik güncellenir.</p>
+        
+        <div class="code-block">
+Otomatik Yenileme Açık  → Kurlar her saniye güncellenir (Yeşil)
+Otomatik Yenileme Kapalı → Manuel yenileme gerekir (Gri)
+        </div>
+        
+        <p>Kapatmak için butona tıklayın. Manuel yenileme için "Yenile" butonunu kullanın.</p>
+        
+        <h3>4.4. Altın Ons Kurları</h3>
+        <p>Sayfanın alt kısmında iki altın ons kaynağı görürsünüz:</p>
+        <ul>
+            <li><strong>Altın Ons İstanbul:</strong> Türkiye piyasasındaki ons fiyatı</li>
+            <li><strong>Altın Ons Londra:</strong> Uluslararası piyasadaki ons fiyatı</li>
+            <li><strong>Satış Farkı:</strong> İstanbul ve Londra satış fiyatı arasındaki fark (USD ve TRY cinsinden)</li>
+        </ul>
+        
+        <div class="warning-box">
+            <strong>⚠️ Önemli:</strong> Fark pozitif (+) ise İstanbul fiyatı daha yüksek, negatif (-) ise Londra fiyatı daha yüksektir.
+        </div>
+        
+        <h2 id="hesap-makinesi">5. Hesap Makinesi</h2>
+        
+        <p>Uygulamaya entegre edilmiş tam özellikli bir hesap makinesi bulunur.</p>
+        
+        <h3>5.1. Hesap Makinesini Açma</h3>
+        <ol>
+            <li>Üst kısımdaki "Hesap Makinesi" butonuna tıklayın</li>
+            <li>Hesap makinesi modal pencere olarak açılır</li>
+        </ol>
+        
+        <h3>5.2. Kullanım</h3>
+        <p>Standart bir hesap makinesi gibi kullanabilirsiniz:</p>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Tuş</th>
+                    <th>İşlev</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>0-9</strong></td>
+                    <td>Rakam girişi</td>
+                </tr>
+                <tr>
+                    <td><strong>.</strong></td>
+                    <td>Ondalık nokta</td>
+                </tr>
+                <tr>
+                    <td><strong>+</strong></td>
+                    <td>Toplama</td>
+                </tr>
+                <tr>
+                    <td><strong>-</strong></td>
+                    <td>Çıkarma</td>
+                </tr>
+                <tr>
+                    <td><strong>×</strong></td>
+                    <td>Çarpma</td>
+                </tr>
+                <tr>
+                    <td><strong>÷</strong></td>
+                    <td>Bölme</td>
+                </tr>
+                <tr>
+                    <td><strong>=</strong></td>
+                    <td>Sonucu hesapla</td>
+                </tr>
+                <tr>
+                    <td><strong>C</strong></td>
+                    <td>Son girişi sil</td>
+                </tr>
+                <tr>
+                    <td><strong>AC</strong></td>
+                    <td>Tümünü temizle</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <h3>5.3. Örnek Hesaplama</h3>
+        <div class="code-block">
+1. "5" tuşuna bas
+2. "+" tuşuna bas
+3. "3" tuşuna bas
+4. "=" tuşuna bas
+Sonuç: 8
+        </div>
+        
+        <h3>5.4. Kapatma</h3>
+        <p>Hesap makinesini kapatmak için:</p>
+        <ul>
+            <li>Sağ üstteki "×" butonuna tıklayın, VEYA</li>
+            <li>Modal pencerenin dışına tıklayın</li>
+        </ul>
+        
+        <h2 id="pwa">6. Mobil Cihazlara Kurulum (PWA)</h2>
+        
+        <p>Uygulamayı Progressive Web App (PWA) olarak telefonunuza kurabilirsiniz. 
+        Böylece normal bir uygulama gibi çalışır ve çevrimdışı kullanılabilir.</p>
+        
+        <h3>6.1. iOS (iPhone/iPad) Kurulum</h3>
+        <ol>
+            <li>Safari tarayıcısında uygulamayı açın</li>
+            <li>Alt kısımdaki "Paylaş" simgesine (<strong>↑</strong>) dokunun</li>
+            <li>"Ana Ekrana Ekle" seçeneğini bulun</li>
+            <li>"Ekle" butonuna dokunun</li>
+            <li>Uygulama ana ekranınıza eklenir</li>
+        </ol>
+        
+        <div class="info-box">
+            <strong>📱 Not:</strong> iOS'ta PWA kurulumu sadece Safari tarayıcısında çalışır.
+        </div>
+        
+        <h3>6.2. Android Kurulum</h3>
+        <ol>
+            <li>Chrome tarayıcısında uygulamayı açın</li>
+            <li>Sağ üstteki menüye (⋮) dokunun</li>
+            <li>"Ana ekrana ekle" veya "Uygulama kur" seçeneğini seçin</li>
+            <li>"Kur" butonuna dokunun</li>
+            <li>Uygulama ana ekranınıza eklenir</li>
+        </ol>
+        
+        <h3>6.3. PWA Avantajları</h3>
+        <div class="success-box">
+            <ul>
+                <li>✅ Ana ekrandan direkt açılır</li>
+                <li>✅ Tam ekran çalışır (adres çubuğu yok)</li>
+                <li>✅ Çevrimdışı kullanılabilir (önbellek sayesinde)</li>
+                <li>✅ Uygulama gibi hızlı açılır</li>
+                <li>✅ App Store veya Play Store'a gerek yok</li>
+            </ul>
+        </div>
+        
+        <h2 id="desktop">7. Masaüstü Uygulaması</h2>
+        
+        <p>Windows ve Mac bilgisayarlar için bağımsız masaüstü uygulaması mevcuttur.</p>
+        
+        <h3>7.1. Windows Kurulum</h3>
+        <ol>
+            <li><strong>Kurulum dosyasını indirin:</strong>
+                <ul>
+                    <li><code>Doviz-Karsilastirma-Setup-1.0.0.exe</code> (Yükleyici)</li>
+                    <li>veya <code>Doviz-Karsilastirma-1.0.0.exe</code> (Taşınabilir)</li>
+                </ul>
+            </li>
+            <li>Yükleyici dosyasını çift tıklayarak çalıştırın</li>
+            <li>Kurulum sihirbazını takip edin</li>
+            <li>Kurulum tamamlandığında masaüstünden veya Başlat menüsünden açın</li>
+        </ol>
+        
+        <div class="warning-box">
+            <strong>⚠️ Windows Defender Uyarısı:</strong> İlk çalıştırmada "Bilinmeyen yayıncı" uyarısı alabilirsiniz. 
+            "Daha fazla bilgi" → "Yine de çalıştır" seçeneğini kullanabilirsiniz.
+        </div>
+        
+        <h3>7.2. Mac Kurulum</h3>
+        <ol>
+            <li><strong>DMG dosyasını indirin:</strong> <code>Doviz-Karsilastirma-1.0.0.dmg</code></li>
+            <li>DMG dosyasını açın</li>
+            <li>Uygulama simgesini "Applications" klasörüne sürükleyin</li>
+            <li>Applications klasöründen uygulamayı açın</li>
+        </ol>
+        
+        <div class="warning-box">
+            <strong>⚠️ macOS Gatekeeper:</strong> İlk açılışta "güvenilir geliştirici değil" uyarısı alabilirsiniz.
+            <br>Çözüm: Sistem Ayarları → Gizlilik ve Güvenlik → "Yine de aç" butonuna tıklayın.
+        </div>
+        
+        <h3>7.3. Linux Kurulum</h3>
+        <ol>
+            <li><strong>Tercih ettiğiniz paketi indirin:</strong>
+                <ul>
+                    <li><code>doviz-karsilastirma_1.0.0_amd64.deb</code> (Debian/Ubuntu)</li>
+                    <li><code>Doviz-Karsilastirma-1.0.0.AppImage</code> (Evrensel)</li>
+                </ul>
+            </li>
+            <li><strong>DEB paketi için:</strong>
+                <div class="code-block">sudo dpkg -i doviz-karsilastirma_1.0.0_amd64.deb</div>
+            </li>
+            <li><strong>AppImage için:</strong>
+                <div class="code-block">chmod +x Doviz-Karsilastirma-1.0.0.AppImage
+./Doviz-Karsilastirma-1.0.0.AppImage</div>
+            </li>
+        </ol>
+        
+        <h3>7.4. Masaüstü Uygulaması Avantajları</h3>
+        <div class="success-box">
+            <ul>
+                <li>✅ Tarayıcı gerektirmez</li>
+                <li>✅ Daha hızlı başlatma</li>
+                <li>✅ Sistem tepsisinde çalışabilir</li>
+                <li>✅ Otomatik güncellemeler</li>
+                <li>✅ Tam ekran modu</li>
+            </ul>
+        </div>
+        
+        <h2 id="sorun-giderme">8. Sorun Giderme</h2>
+        
+        <h3>8.1. Kurlar Yüklenmiyor</h3>
+        <div class="warning-box">
+            <strong>Sorun:</strong> "Kurlar yükleniyor..." ekranı donuyor veya kurlar görünmüyor.
+        </div>
+        <p><strong>Çözümler:</strong></p>
+        <ol>
+            <li>İnternet bağlantınızı kontrol edin</li>
+            <li>Sayfayı yenileyin (F5 veya Ctrl+R)</li>
+            <li>Tarayıcınızın önbelleğini temizleyin</li>
+            <li>Farklı bir tarayıcı deneyin</li>
+            <li>Backend sunucusunun çalıştığını kontrol edin</li>
+        </ol>
+        
+        <h3>8.2. Bazı Kaynaklar Veri Vermiyor</h3>
+        <div class="warning-box">
+            <strong>Sorun:</strong> Bir veya birkaç döviz bürosu için kurlar görünmüyor (gri nokta).
+        </div>
+        <p><strong>Çözümler:</strong></p>
+        <ul>
+            <li>Bu normal bir durumdur - kaynak web sitesi geçici erişilemez olabilir</li>
+            <li>Birkaç dakika bekleyip otomatik yenilemenin çözmesini bekleyin</li>
+            <li>Diğer kaynakların verilerini kullanabilirsiniz</li>
+        </ul>
+        
+        <h3>8.3. Hesap Makinesi Açılmıyor</h3>
+        <div class="warning-box">
+            <strong>Sorun:</strong> Hesap Makinesi butonuna basınca modal açılmıyor.
+        </div>
+        <p><strong>Çözümler:</strong></p>
+        <ol>
+            <li>Sayfayı yenileyin</li>
+            <li>Tarayıcı konsolunu açıp hata mesajı olup olmadığını kontrol edin (F12)</li>
+            <li>JavaScript'in etkin olduğundan emin olun</li>
+        </ol>
+        
+        <h3>8.4. PWA Kurulumu Görünmüyor</h3>
+        <div class="warning-box">
+            <strong>Sorun:</strong> "Ana ekrana ekle" seçeneği görünmüyor.
+        </div>
+        <p><strong>Çözümler:</strong></p>
+        <ul>
+            <li><strong>iOS:</strong> Safari tarayıcısını kullanın (Chrome/Firefox çalışmaz)</li>
+            <li><strong>Android:</strong> Chrome veya Edge tarayıcısını kullanın</li>
+            <li>HTTPS bağlantısında olduğunuzdan emin olun</li>
+            <li>Uygulama zaten kuruluysa seçenek görünmez</li>
+        </ul>
+        
+        <h3>8.5. Masaüstü Uygulaması Açılmıyor</h3>
+        <div class="warning-box">
+            <strong>Sorun:</strong> Masaüstü uygulaması çalışmıyor veya hata veriyor.
+        </div>
+        <p><strong>Çözümler:</strong></p>
+        <ul>
+            <li>Uygulamayı kaldırıp yeniden kurun</li>
+            <li>Antivirus yazılımınızı kontrol edin (engellemiş olabilir)</li>
+            <li>Backend sunucusunun doğru adreste çalıştığından emin olun</li>
+            <li>Güvenlik duvarı ayarlarınızı kontrol edin</li>
+        </ul>
+        
+        <h3>8.6. Performans Sorunları</h3>
+        <div class="warning-box">
+            <strong>Sorun:</strong> Uygulama yavaş çalışıyor veya donuyor.
+        </div>
+        <p><strong>Çözümler:</strong></p>
+        <ol>
+            <li>Otomatik yenilemeyi kapatın</li>
+            <li>Diğer sekmeleri/uygulamaları kapatın</li>
+            <li>Tarayıcıyı yeniden başlatın</li>
+            <li>Bilgisayarınızı yeniden başlatın</li>
+            <li>Daha yeni bir tarayıcı sürümü kullanın</li>
+        </ol>
+        
+        <hr style="margin: 40px 0; border: none; border-top: 2px solid #ddd;">
+        
+        <h2>📞 Destek</h2>
+        <p>Bu kılavuzda bulamadığınız bir sorunla karşılaştıysanız:</p>
+        <ul>
+            <li>GitHub Issues sayfasını kontrol edin</li>
+            <li>Yeni bir issue açın</li>
+            <li>Detaylı açıklama ve hata mesajı ekleyin</li>
+        </ul>
+        
+        <h2>📝 Lisans</h2>
+        <p>Bu uygulama MIT Lisansı altında dağıtılmaktadır.</p>
+        
+        <p style="text-align: center; color: #666; margin-top: 40px;">
+            <strong>Döviz Karşılaştırma v1.0.0</strong><br>
+            © 2025 - Tüm hakları saklıdır
+        </p>
+    </div>
+</body>
+</html>
