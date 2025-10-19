@@ -131,3 +131,7 @@ frontend/dist/doviz-mac-app-fixed.tar.gz
 frontend/dist/mac-arm64/Döviz
 Karşılaştırma.app/Contents/Frameworks/Electron
 frontend/dist/mac-arm64/Electron.app/Contents/Resources/app.asar
+-e 
+# Environment files
+*.env
+*.env.*
