@@ -180,52 +180,42 @@ async def scrape_haremaltin():
             error_message=str(e)
         )
 
-def scrape_hakandoviz():
+async def scrape_hakandoviz():
     """Scrape rates from Hakan Döviz"""
     try:
         url = "https://www.hakandoviz.com/canli-piyasalar"
+        soup = await scrape_with_playwright(url, None)
         
-        # Get real rates
-        real_rates = get_real_rates()
-        if not real_rates:
-            raise Exception("Could not fetch real rates")
+        if not soup:
+            raise Exception("Failed to load page")
         
-        # Add slight variations for buy/sell spread (0.32% spread)
-        spread = 0.0032
-        rates = {
-            'USD': ExchangeRate(
-                currency='USD',
-                buy=round(real_rates['USD'] * (1 - spread), 4),
-                sell=round(real_rates['USD'] * (1 + spread), 4)
-            ),
-            'EUR': ExchangeRate(
-                currency='EUR',
-                buy=round(real_rates['EUR'] * (1 - spread), 4),
-                sell=round(real_rates['EUR'] * (1 + spread), 4)
-            ),
-            'GBP': ExchangeRate(
-                currency='GBP',
-                buy=round(real_rates['GBP'] * (1 - spread), 4),
-                sell=round(real_rates['GBP'] * (1 + spread), 4)
-            ),
-            'CHF': ExchangeRate(
-                currency='CHF',
-                buy=round(real_rates['CHF'] * (1 - spread), 4),
-                sell=round(real_rates['CHF'] * (1 + spread), 4)
-            ),
-            'XAU': ExchangeRate(
-                currency='XAU',
-                buy=round(real_rates['XAU'] * (1 - spread), 2),
-                sell=round(real_rates['XAU'] * (1 + spread), 2)
-            ) if real_rates['XAU'] > 0 else ExchangeRate(currency='XAU', buy=0, sell=0),
-        }
+        rates = {}
+        all_text = soup.get_text()
+        
+        for currency in ['USD', 'EUR', 'GBP', 'CHF', 'XAU']:
+            pattern = f"{currency}[^0-9]*([0-9.,]+)[^0-9]*([0-9.,]+)"
+            matches = re.findall(pattern, all_text)
+            
+            if matches:
+                try:
+                    buy = float(matches[0][0].replace(',', '.'))
+                    sell = float(matches[0][1].replace(',', '.'))
+                    if buy > 0 and sell > 0:
+                        rates[currency] = ExchangeRate(
+                            currency=currency,
+                            buy=buy,
+                            sell=sell
+                        )
+                except (ValueError, IndexError):
+                    continue
         
         return SourceRates(
             source="Hakan Döviz",
             url=url,
             rates=rates,
             last_updated=datetime.now(timezone.utc).isoformat(),
-            status="success"
+            status="success" if rates else "error",
+            error_message="No rates found" if not rates else None
         )
     except Exception as e:
         logger.error(f"Error scraping Hakan Doviz: {e}")
