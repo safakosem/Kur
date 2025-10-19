@@ -104,35 +104,66 @@ def get_accurate_rates():
         return None
 
 # Scraper functions
+# Helper function to scrape with Playwright
+async def scrape_with_playwright(url):
+    """Scrape a website using Playwright for JavaScript-rendered content"""
+    try:
+        async with async_playwright() as p:
+            browser = await p.chromium.launch(
+                headless=True,
+                args=['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+            )
+            page = await browser.new_page()
+            await page.goto(url, timeout=30000, wait_until="networkidle")
+            await page.wait_for_timeout(3000)  # Wait for JS to render
+            
+            content = await page.content()
+            await browser.close()
+            
+            soup = BeautifulSoup(content, 'html.parser')
+            return soup
+    except Exception as e:
+        logger.error(f"Playwright scraping error for {url}: {e}")
+        return None
+
+# Scraper functions
 async def scrape_ahlatci():
-    """Get rates for Ahlatcı Döviz"""
+    """Scrape rates from Ahlatcı Döviz"""
     try:
         url = "https://www.ahlatcidoviz.com.tr"
+        soup = await scrape_with_playwright(url)
         
-        # Get accurate rates
-        accurate_rates = get_accurate_rates()
-        if not accurate_rates:
-            raise Exception("Could not fetch accurate rates")
+        if not soup:
+            raise Exception("Failed to load page")
         
-        # Simulate slight spread (0.25% spread)
-        spread = 0.0025
         rates = {}
+        rows = soup.find_all('tr')
         
-        for currency in ['USD', 'EUR', 'GBP', 'CHF', 'XAU']:
-            if currency in accurate_rates:
-                base_rate = accurate_rates[currency]
-                if currency == 'XAU':
-                    rates[currency] = ExchangeRate(
-                        currency=currency,
-                        buy=round(base_rate * (1 - spread), 2),
-                        sell=round(base_rate * (1 + spread), 2)
-                    )
-                else:
-                    rates[currency] = ExchangeRate(
-                        currency=currency,
-                        buy=round(base_rate * (1 - spread), 4),
-                        sell=round(base_rate * (1 + spread), 4)
-                    )
+        for row in rows:
+            text = row.get_text(strip=True)
+            cols = row.find_all(['td', 'th'])
+            
+            for currency in ['USD', 'EUR', 'GBP', 'CHF', 'XAU']:
+                # Match exact currency code at start
+                if len(cols) >= 3:
+                    code = cols[0].get_text(strip=True)
+                    if code == currency:
+                        try:
+                            buy_text = cols[1].get_text(strip=True).replace(',', '.')
+                            sell_text = cols[2].get_text(strip=True).replace(',', '.')
+                            buy = float(buy_text)
+                            sell = float(sell_text)
+                            
+                            if buy > 0 and sell > 0:
+                                rates[currency] = ExchangeRate(
+                                    currency=currency,
+                                    buy=buy,
+                                    sell=sell
+                                )
+                                logger.info(f"Ahlatci - {currency}: Buy={buy}, Sell={sell}")
+                        except (ValueError, AttributeError) as e:
+                            logger.error(f"Error parsing {currency}: {e}")
+                            continue
         
         return SourceRates(
             source="Ahlatcı Döviz",
