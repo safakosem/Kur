@@ -177,8 +177,14 @@ async def scrape_haremaltin():
                 # Check for gold - look for "GOLD TRY" (might be repeated like "GOLD TRYGOLD TRY")
                 if 'GOLDTRY' in code_text.replace(' ', '') and 'XAU' not in rates:
                     try:
-                        buy_text = cols[1].get_text(strip=True).replace(',', '.').replace(' ', '')
-                        sell_text = cols[2].get_text(strip=True).replace(',', '.').replace(' ', '')
+                        buy_text = cols[1].get_text(strip=True).replace(' ', '')
+                        sell_text = cols[2].get_text(strip=True).replace(' ', '')
+                        
+                        # Handle format like "6.070,20" - dot for thousands, comma for decimal
+                        # Remove dots (thousands separator) and replace comma with dot
+                        buy_text = buy_text.replace('.', '').replace(',', '.')
+                        sell_text = sell_text.replace('.', '').replace(',', '.')
+                        
                         buy = float(buy_text)
                         sell = float(sell_text)
                         
@@ -190,7 +196,7 @@ async def scrape_haremaltin():
                             )
                             logger.info(f"Harem Altin - XAU: Buy={buy}, Sell={sell}")
                     except (ValueError, AttributeError) as e:
-                        logger.error(f"Error parsing gold: {e}")
+                        logger.error(f"Error parsing gold: {e}, buy_text={buy_text}, sell_text={sell_text}")
                         continue
         
         return SourceRates(
