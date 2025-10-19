@@ -17,6 +17,8 @@ from concurrent.futures import ThreadPoolExecutor
 from playwright.async_api import async_playwright
 import time
 
+import time
+
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
@@ -24,6 +26,13 @@ load_dotenv(ROOT_DIR / '.env')
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
+
+# Cache for rates
+rates_cache = {
+    'data': None,
+    'last_updated': 0,
+    'cache_duration': 5  # Cache for 5 seconds
+}
 
 # Create the main app without a prefix
 app = FastAPI()
