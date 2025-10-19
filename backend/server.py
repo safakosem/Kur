@@ -358,15 +358,12 @@ async def scrape_carsidoviz():
             except ValueError as e:
                 logger.error(f"Error parsing USD: {e}")
         
-        # EUR
-        eur_match = re.search(r'Euro\s+Alış:\s*([\d.,]+)\s+Satış:\s*([\d.,]+?)(?:\d{2}\s*Ayar|$)', all_text, re.IGNORECASE)
+        # EUR - need to be careful not to capture "24" from "24 Ayar Altın"
+        eur_match = re.search(r'Euro\s+Alış:\s*([\d.,]+)\s+Satış:\s*([\d.,]+)\s*(?=24|$)', all_text, re.IGNORECASE)
         if eur_match:
             try:
-                buy_str = eur_match.group(1).replace(',', '.')
-                sell_str = eur_match.group(2).replace(',', '.')
-                # Clean up any trailing digits that might be from "24 Ayar"
-                buy = float(re.sub(r'[^\d.]', '', buy_str))
-                sell = float(re.sub(r'[^\d.]', '', sell_str))
+                buy = float(eur_match.group(1).replace(',', '.'))
+                sell = float(eur_match.group(2).replace(',', '.'))
                 rates['EUR'] = ExchangeRate(currency='EUR', buy=buy, sell=sell)
                 logger.info(f"Carsi Doviz - EUR: Buy={buy}, Sell={sell}")
             except ValueError as e:
