@@ -673,6 +673,7 @@ body {
   }
   
   .toggle-btn,
+  .calculator-btn,
   .refresh-btn {
     width: 100%;
     justify-content: center;
@@ -700,6 +701,21 @@ body {
     flex-direction: column;
     gap: 0.75rem;
     text-align: center;
+  }
+
+  .calculator-modal {
+    width: 95%;
+    margin: 1rem;
+  }
+
+  .calculator-display {
+    font-size: 2rem;
+    min-height: 60px;
+  }
+
+  .calc-btn {
+    padding: 1rem;
+    font-size: 1.1rem;
   }
 }
 
