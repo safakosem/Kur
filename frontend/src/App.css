@@ -301,15 +301,15 @@ body {
 
 .gold-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.25rem;
   margin-top: 0;
 }
 
 .gold-card {
   background: white;
-  border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
   border: 2px solid #f0e6d2;
   overflow: hidden;
   transition: transform 0.2s, box-shadow 0.2s;
@@ -317,12 +317,12 @@ body {
 
 .gold-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
 .gold-card-header {
   background: linear-gradient(135deg, #fef5e7 0%, #fdebd0 100%);
-  padding: 1rem 1.5rem;
+  padding: 0.75rem 1rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -330,31 +330,31 @@ body {
 }
 
 .gold-source-name {
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: #2c2c2c;
 }
 
 .gold-card-content {
-  padding: 1.5rem;
+  padding: 1rem;
 }
 
 .gold-rates {
   display: flex;
   justify-content: space-around;
   align-items: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .gold-rate-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.375rem;
 }
 
 .gold-rate-label {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: #9ca3af;
@@ -362,51 +362,62 @@ body {
 }
 
 .gold-rate-value {
-  font-size: 1.75rem;
+  font-size: 1.25rem;
   font-weight: 700;
   color: #1f2937;
 }
 
 .gold-rate-divider {
   width: 1px;
-  height: 60px;
+  height: 40px;
   background: linear-gradient(to bottom, transparent, #e5e7eb, transparent);
 }
 
 .gold-spread {
   background: linear-gradient(135deg, #fef5e7 0%, #fdebd0 100%);
   border: 2px solid #d4a574;
-  border-radius: 12px;
-  padding: 1rem;
+  border-radius: 8px;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.spread-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
 .spread-label {
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   font-weight: 600;
   color: #666;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
 }
 
 .spread-values {
   display: flex;
-  gap: 1rem;
+  gap: 0.5rem;
   align-items: baseline;
 }
 
 .spread-amount {
-  font-size: 1.5rem;
+  font-size: 1rem;
   font-weight: 700;
-  color: #b8860b;
+}
+
+.spread-amount.positive {
+  color: #dc2626;
+}
+
+.spread-amount.negative {
+  color: #16a34a;
 }
 
 .spread-percent {
-  font-size: 1rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  color: #d4a574;
+  color: #9ca3af;
 }
 
 /* Responsive */
