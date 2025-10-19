@@ -119,3 +119,8 @@ frontend/dist/doviz-windows-app.tar.gz
 *.env.*
 frontend/public/doviz-linux-app.tar.gz
 frontend/public/doviz-windows-app.tar.gz
+frontend/build/doviz-linux-app.tar.gz
+frontend/build/doviz-windows-app.tar.gz
+frontend/dist/mac-arm64/Electron.app/Contents/Frameworks/Electron
+Framework.framework/Versions/A/Electron
+Framework
