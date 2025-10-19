@@ -62,6 +62,81 @@ function App() {
     }
   }, [autoRefresh]);
 
+  // Calculator Functions
+  const handleCalcNumber = (num) => {
+    if (calcWaitingForOperand) {
+      setCalcDisplay(String(num));
+      setCalcWaitingForOperand(false);
+    } else {
+      setCalcDisplay(calcDisplay === '0' ? String(num) : calcDisplay + num);
+    }
+  };
+
+  const handleCalcDecimal = () => {
+    if (calcWaitingForOperand) {
+      setCalcDisplay('0.');
+      setCalcWaitingForOperand(false);
+    } else if (calcDisplay.indexOf('.') === -1) {
+      setCalcDisplay(calcDisplay + '.');
+    }
+  };
+
+  const handleCalcOperation = (nextOp) => {
+    const inputValue = parseFloat(calcDisplay);
+
+    if (calcPrevValue === null) {
+      setCalcPrevValue(inputValue);
+    } else if (calcOperation) {
+      const currentValue = calcPrevValue || 0;
+      const newValue = performCalculation(currentValue, inputValue, calcOperation);
+      
+      setCalcDisplay(String(newValue));
+      setCalcPrevValue(newValue);
+    }
+
+    setCalcWaitingForOperand(true);
+    setCalcOperation(nextOp);
+  };
+
+  const performCalculation = (firstValue, secondValue, operation) => {
+    switch (operation) {
+      case '+':
+        return firstValue + secondValue;
+      case '-':
+        return firstValue - secondValue;
+      case '×':
+        return firstValue * secondValue;
+      case '÷':
+        return firstValue / secondValue;
+      default:
+        return secondValue;
+    }
+  };
+
+  const handleCalcEquals = () => {
+    const inputValue = parseFloat(calcDisplay);
+
+    if (calcPrevValue !== null && calcOperation) {
+      const newValue = performCalculation(calcPrevValue, inputValue, calcOperation);
+      setCalcDisplay(String(newValue));
+      setCalcPrevValue(null);
+      setCalcOperation(null);
+      setCalcWaitingForOperand(true);
+    }
+  };
+
+  const handleCalcClear = () => {
+    setCalcDisplay('0');
+    setCalcPrevValue(null);
+    setCalcOperation(null);
+    setCalcWaitingForOperand(false);
+  };
+
+  const handleCalcClearEntry = () => {
+    setCalcDisplay('0');
+    setCalcWaitingForOperand(false);
+  };
+
   const getBestRate = (currency, type) => {
     if (!rates || !rates.sources) return null;
     
