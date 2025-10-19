@@ -56,53 +56,6 @@ class AllRatesResponse(BaseModel):
     sources: List[SourceRates]
     timestamp: str
 
-# Helper function to get real exchange rates from reliable API
-def get_accurate_rates():
-    """Get accurate exchange rates using free Open Exchange Rates API"""
-    try:
-        # Using open.er-api.com - free tier, no key required
-        base_url = "https://open.er-api.com/v6/latest/USD"
-        
-        response = requests.get(base_url, timeout=10)
-        data = response.json()
-        
-        if data.get('result') != 'success':
-            raise Exception("API request failed")
-        
-        rates = data.get('rates', {})
-        
-        # Get TRY rate and calculate inverses for other currencies
-        try_per_usd = rates.get('TRY', 0)
-        
-        if try_per_usd == 0:
-            raise Exception("TRY rate not found")
-        
-        # Calculate TRY rates for each currency
-        try_rates = {
-            'USD': try_per_usd,
-            'EUR': try_per_usd / rates.get('EUR', 1) if rates.get('EUR') else 0,
-            'GBP': try_per_usd / rates.get('GBP', 1) if rates.get('GBP') else 0,
-            'CHF': try_per_usd / rates.get('CHF', 1) if rates.get('CHF') else 0
-        }
-        
-        # Get gold price
-        try:
-            gold_response = requests.get("https://api.gold-api.com/price/XAU", timeout=10)
-            if gold_response.status_code == 200:
-                gold_data = gold_response.json()
-                gold_usd = float(gold_data.get('price', 2650))
-            else:
-                gold_usd = 2650  # Fallback
-            try_rates['XAU'] = gold_usd * try_per_usd
-        except:
-            # Fallback gold price
-            try_rates['XAU'] = 2650 * try_per_usd
-        
-        return try_rates
-    except Exception as e:
-        logger.error(f"Error getting accurate rates: {e}")
-        return None
-
 # Scraper functions
 # Helper function to scrape with Playwright
 async def scrape_with_playwright(url):
