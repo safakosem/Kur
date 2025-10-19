@@ -199,6 +199,15 @@ function App() {
               {autoRefresh ? "Otomatik Yenileme Açık" : "Otomatik Yenileme Kapalı"}
             </Button>
             <Button
+              onClick={() => setShowCalculator(true)}
+              variant="outline"
+              className="calculator-btn"
+              data-testid="calculator-button"
+            >
+              <Calculator className="w-4 h-4 mr-2" />
+              Hesap Makinesi
+            </Button>
+            <Button
               onClick={() => fetchRates(true)}
               disabled={refreshing}
               className="refresh-btn"
