@@ -294,6 +294,121 @@ body {
   box-shadow: 0 0 8px rgba(22, 163, 74, 0.3);
 }
 
+/* Gold Ounce Section */
+.gold-ounce-section {
+  margin-top: 2rem;
+}
+
+.gold-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 1.5rem;
+  margin-top: 0;
+}
+
+.gold-card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  border: 2px solid #f0e6d2;
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.gold-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+}
+
+.gold-card-header {
+  background: linear-gradient(135deg, #fef5e7 0%, #fdebd0 100%);
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid #d4a574;
+}
+
+.gold-source-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #2c2c2c;
+}
+
+.gold-card-content {
+  padding: 1.5rem;
+}
+
+.gold-rates {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.gold-rate-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.gold-rate-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #9ca3af;
+  font-weight: 600;
+}
+
+.gold-rate-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.gold-rate-divider {
+  width: 1px;
+  height: 60px;
+  background: linear-gradient(to bottom, transparent, #e5e7eb, transparent);
+}
+
+.gold-spread {
+  background: linear-gradient(135deg, #fef5e7 0%, #fdebd0 100%);
+  border: 2px solid #d4a574;
+  border-radius: 12px;
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.spread-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.spread-values {
+  display: flex;
+  gap: 1rem;
+  align-items: baseline;
+}
+
+.spread-amount {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #b8860b;
+}
+
+.spread-percent {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #d4a574;
+}
+
 /* Responsive */
 @media (max-width: 1400px) {
   .app-title {
