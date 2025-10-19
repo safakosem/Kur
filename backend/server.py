@@ -339,41 +339,47 @@ async def scrape_carsidoviz():
         
         rates = {}
         
-        # This site only has USD and EUR (no CHF, GBP, or reliable XAU data)
-        # They use Turkish names like DOLAR, EURO
-        currency_mapping = {
-            'DOLAR': 'USD',
-            'USD': 'USD',
-            'EURO': 'EUR',
-            'EUR': 'EUR'
-        }
+        # Get all text content
+        all_text = soup.get_text()
         
-        # Strategy 1: Look in divs with classes
-        all_divs = soup.find_all(['div', 'span', 'p'])
-        for div in all_divs:
-            text = div.get_text(strip=True).upper()
-            
-            for turkish_name, english_code in currency_mapping.items():
-                if turkish_name in text and english_code not in rates:
-                    # Try to find numbers in the parent or nearby elements
-                    parent = div.parent
-                    if parent:
-                        parent_text = parent.get_text(strip=True)
-                        import re
-                        numbers = re.findall(r'(\d{2}[.,]\d{4})', parent_text)
-                        if len(numbers) >= 2:
-                            try:
-                                buy = float(numbers[0].replace(',', '.'))
-                                sell = float(numbers[1].replace(',', '.'))
-                                if buy > 0 and sell > 0 and 10 < buy < 100:  # Sanity check for USD/EUR
-                                    rates[english_code] = ExchangeRate(
-                                        currency=english_code,
-                                        buy=buy,
-                                        sell=sell
-                                    )
-                                    logger.info(f"Carsi Doviz - {english_code}: Buy={buy}, Sell={sell}")
-                            except (ValueError, IndexError):
-                                continue
+        # Parse using regex patterns
+        # Format: "Dolar Alış: 41.9000 Satış: 42.3000"
+        # Format: "Euro Alış: 48.7000 Satış: 49.1500"
+        # Format: "24 Ayar Altın Alış: 6075 Satış: 6275"
+        
+        # USD
+        usd_match = re.search(r'Dolar\s+Alış:\s*([\d.,]+)\s+Satış:\s*([\d.,]+)', all_text, re.IGNORECASE)
+        if usd_match:
+            try:
+                buy = float(usd_match.group(1).replace(',', '.'))
+                sell = float(usd_match.group(2).replace(',', '.'))
+                rates['USD'] = ExchangeRate(currency='USD', buy=buy, sell=sell)
+                logger.info(f"Carsi Doviz - USD: Buy={buy}, Sell={sell}")
+            except ValueError as e:
+                logger.error(f"Error parsing USD: {e}")
+        
+        # EUR
+        eur_match = re.search(r'Euro\s+Alış:\s*([\d.,]+)\s+Satış:\s*([\d.,]+)', all_text, re.IGNORECASE)
+        if eur_match:
+            try:
+                buy = float(eur_match.group(1).replace(',', '.'))
+                sell = float(eur_match.group(2).replace(',', '.'))
+                rates['EUR'] = ExchangeRate(currency='EUR', buy=buy, sell=sell)
+                logger.info(f"Carsi Doviz - EUR: Buy={buy}, Sell={sell}")
+            except ValueError as e:
+                logger.error(f"Error parsing EUR: {e}")
+        
+        # XAU (24 Ayar Altın)
+        gold_match = re.search(r'24\s*Ayar\s*Altın\s+Alış:\s*([\d.,]+)\s+Satış:\s*([\d.,]+)', all_text, re.IGNORECASE)
+        if gold_match:
+            try:
+                buy = float(gold_match.group(1).replace(',', '.'))
+                sell = float(gold_match.group(2).replace(',', '.'))
+                if buy > 100 and sell > 100:  # Sanity check for gold
+                    rates['XAU'] = ExchangeRate(currency='XAU', buy=buy, sell=sell)
+                    logger.info(f"Carsi Doviz - XAU: Buy={buy}, Sell={sell}")
+            except ValueError as e:
+                logger.error(f"Error parsing XAU: {e}")
         
         return SourceRates(
             source="Çarşı Döviz",
