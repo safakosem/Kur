@@ -56,93 +56,68 @@ class AllRatesResponse(BaseModel):
     sources: List[SourceRates]
     timestamp: str
 
-# Helper function to get real rates from free API
-def get_real_rates():
-    """Get real exchange rates from free API"""
+# Helper function to scrape with Playwright
+async def scrape_with_playwright(url, selectors):
+    """Scrape a website using Playwright for JavaScript-rendered content"""
     try:
-        # Using exchangerate-api.com free tier (no key required)
-        api_url = "https://api.exchangerate-api.com/v4/latest/TRY"
-        response = requests.get(api_url, timeout=10)
-        data = response.json()
-        
-        # Convert from TRY base to get rates
-        rates = data.get('rates', {})
-        
-        # Calculate TRY rates (inverse of the API response)
-        usd_rate = 1 / rates.get('USD', 1) if rates.get('USD') else 0
-        eur_rate = 1 / rates.get('EUR', 1) if rates.get('EUR') else 0
-        gbp_rate = 1 / rates.get('GBP', 1) if rates.get('GBP') else 0
-        chf_rate = 1 / rates.get('CHF', 1) if rates.get('CHF') else 0
-        
-        # Get gold price (XAU/USD) and convert to TRY
-        try:
-            gold_api = "https://api.exchangerate-api.com/v4/latest/USD"
-            gold_response = requests.get(gold_api, timeout=10)
-            gold_data = gold_response.json()
-            # Approximate gold price per troy ounce in USD
-            gold_usd = 2650  # Approximate current gold price
-            xau_rate = gold_usd * usd_rate
-        except:
-            xau_rate = 0
-        
-        return {
-            'USD': usd_rate,
-            'EUR': eur_rate,
-            'GBP': gbp_rate,
-            'CHF': chf_rate,
-            'XAU': xau_rate
-        }
+        async with async_playwright() as p:
+            browser = await p.chromium.launch(headless=True)
+            page = await browser.new_page()
+            await page.goto(url, timeout=15000, wait_until="domcontentloaded")
+            await page.wait_for_timeout(2000)  # Wait for JS to render
+            
+            content = await page.content()
+            await browser.close()
+            
+            soup = BeautifulSoup(content, 'html.parser')
+            return soup
     except Exception as e:
-        logger.error(f"Error getting real rates: {e}")
+        logger.error(f"Playwright scraping error for {url}: {e}")
         return None
 
 # Scraper functions
-def scrape_ahlatci():
+async def scrape_ahlatci():
     """Scrape rates from Ahlatcı Döviz"""
     try:
         url = "https://www.ahlatcidoviz.com.tr"
+        soup = await scrape_with_playwright(url, None)
         
-        # Get real rates
-        real_rates = get_real_rates()
-        if not real_rates:
-            raise Exception("Could not fetch real rates")
+        if not soup:
+            raise Exception("Failed to load page")
         
-        # Add slight variations for buy/sell spread (0.3% spread)
-        spread = 0.003
-        rates = {
-            'USD': ExchangeRate(
-                currency='USD',
-                buy=round(real_rates['USD'] * (1 - spread), 4),
-                sell=round(real_rates['USD'] * (1 + spread), 4)
-            ),
-            'EUR': ExchangeRate(
-                currency='EUR',
-                buy=round(real_rates['EUR'] * (1 - spread), 4),
-                sell=round(real_rates['EUR'] * (1 + spread), 4)
-            ),
-            'GBP': ExchangeRate(
-                currency='GBP',
-                buy=round(real_rates['GBP'] * (1 - spread), 4),
-                sell=round(real_rates['GBP'] * (1 + spread), 4)
-            ),
-            'CHF': ExchangeRate(
-                currency='CHF',
-                buy=round(real_rates['CHF'] * (1 - spread), 4),
-                sell=round(real_rates['CHF'] * (1 + spread), 4)
-            ),
-            'XAU': ExchangeRate(
-                currency='XAU',
-                buy=round(real_rates['XAU'] * (1 - spread), 2),
-                sell=round(real_rates['XAU'] * (1 + spread), 2)
-            ) if real_rates['XAU'] > 0 else ExchangeRate(currency='XAU', buy=0, sell=0),
-        }
+        rates = {}
+        # Look for table rows or divs containing currency data
+        rows = soup.find_all('tr')
+        
+        for row in rows:
+            cols = row.find_all(['td', 'th'])
+            if len(cols) >= 3:
+                text = ' '.join([col.get_text(strip=True) for col in cols])
+                
+                for currency in ['USD', 'EUR', 'GBP', 'CHF', 'XAU']:
+                    if currency in text:
+                        # Extract numbers
+                        numbers = re.findall(r'\d+[.,]?\d*', text)
+                        if len(numbers) >= 2:
+                            try:
+                                buy = float(numbers[0].replace(',', '.').replace('.', '', numbers[0].count('.') - 1))
+                                sell = float(numbers[1].replace(',', '.').replace('.', '', numbers[1].count('.') - 1))
+                                if currency not in rates and buy > 0 and sell > 0:
+                                    rates[currency] = ExchangeRate(
+                                        currency=currency,
+                                        buy=buy,
+                                        sell=sell
+                                    )
+                            except (ValueError, IndexError):
+                                continue
         
         return SourceRates(
             source="Ahlatcı Döviz",
             url=url,
             rates=rates,
             last_updated=datetime.now(timezone.utc).isoformat(),
-            status="success"
+            status="success" if rates else "error",
+            error_message="No rates found" if not rates else None
         )
     except Exception as e:
         logger.error(f"Error scraping Ahlatci: {e}")
