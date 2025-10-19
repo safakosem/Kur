@@ -59,10 +59,12 @@ function App() {
 
   useEffect(() => {
     fetchRates();
-    // Auto-refresh every 1 second
-    const interval = setInterval(() => fetchRates(true), 1000);
-    return () => clearInterval(interval);
-  }, []);
+    // Auto-refresh every 1 second if enabled
+    if (autoRefresh) {
+      const interval = setInterval(() => fetchRates(true), 1000);
+      return () => clearInterval(interval);
+    }
+  }, [autoRefresh]);
 
   const getBestRate = (currency, type) => {
     if (!rates || !rates.sources) return null;
