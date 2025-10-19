@@ -285,19 +285,41 @@ async def root():
 async def get_rates():
     """Get exchange rates from all sources"""
     try:
-        # Run all scrapers in parallel using thread pool
-        loop = asyncio.get_event_loop()
-        with ThreadPoolExecutor(max_workers=4) as executor:
-            futures = [
-                loop.run_in_executor(executor, scrape_ahlatci),
-                loop.run_in_executor(executor, scrape_haremaltin),
-                loop.run_in_executor(executor, scrape_hakandoviz),
-                loop.run_in_executor(executor, scrape_carsidoviz)
-            ]
-            results = await asyncio.gather(*futures)
+        # Run all scrapers concurrently
+        results = await asyncio.gather(
+            scrape_ahlatci(),
+            scrape_haremaltin(),
+            scrape_hakandoviz(),
+            scrape_carsidoviz(),
+            return_exceptions=True
+        )
+        
+        # Handle any exceptions and convert to error responses
+        final_results = []
+        source_names = ["Ahlatcı Döviz", "Harem Altın", "Hakan Döviz", "Çarşı Döviz"]
+        urls = [
+            "https://www.ahlatcidoviz.com.tr",
+            "https://www.haremaltin.com/?lang=en",
+            "https://www.hakandoviz.com/canli-piyasalar",
+            "https://carsidoviz.com"
+        ]
+        
+        for i, result in enumerate(results):
+            if isinstance(result, Exception):
+                logger.error(f"Error from {source_names[i]}: {result}")
+                final_results.append(SourceRates(
+                    source=source_names[i],
+                    url=urls[i],
+                    rates={},
+                    last_updated=datetime.now(timezone.utc).isoformat(),
+                    status="error",
+                    error_message=str(result)
+                ))
+            else:
+                final_results.append(result)
         
         return AllRatesResponse(
-            sources=results,
+            sources=final_results,
             timestamp=datetime.now(timezone.utc).isoformat()
         )
     except Exception as e:
