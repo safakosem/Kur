@@ -143,3 +143,7 @@ frontend/dist/mac-arm64/Electron.app/Contents/Resources/app.asar
 # Environment files
 *.env
 *.env.*
+-e 
+# Environment files
+*.env
+*.env.*
