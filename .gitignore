@@ -102,3 +102,12 @@ frontend/node_modules/electron/dist/electron
 # Environment files
 *.env
 *.env.*
+-e 
+# Environment files
+*.env
+*.env.*
+frontend/dist/linux-arm64-unpacked/doviz-karsilastirma
+frontend/dist/linux-arm64-unpacked/resources/app.asar
+frontend/dist/win-arm64-unpacked/resources/app.asar
+frontend/dist/win-arm64-unpacked/Döviz
+Karşılaştırma.exe
