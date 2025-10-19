@@ -202,67 +202,78 @@ function App() {
         {/* Gold Ounce Rates - Separate Section */}
         <div className="gold-ounce-section">
           <div className="table-title">Altın Ons Kurları (XAU/USD)</div>
-          <div className="gold-cards">
-            {goldOunceSources.map((source, idx) => {
-              const xauRate = source.rates['XAU'];
-              
-              // Calculate sell difference between Istanbul and London
-              let sellDiff = 0;
-              let sellDiffPercent = 0;
-              
-              if (idx === 0 && goldOunceSources[1]?.rates['XAU']) {
-                // Istanbul - compare with London
-                const londonRate = goldOunceSources[1].rates['XAU'];
-                sellDiff = (xauRate.sell - londonRate.sell).toFixed(2);
-                sellDiffPercent = ((sellDiff / londonRate.sell) * 100).toFixed(3);
-              } else if (idx === 1 && goldOunceSources[0]?.rates['XAU']) {
-                // London - compare with Istanbul
-                const istanbulRate = goldOunceSources[0].rates['XAU'];
-                sellDiff = (xauRate.sell - istanbulRate.sell).toFixed(2);
-                sellDiffPercent = ((sellDiff / istanbulRate.sell) * 100).toFixed(3);
-              }
-              
-              return (
-                <div key={idx} className="gold-card" data-testid={`gold-card-${idx}`}>
-                  <div className="gold-card-header">
-                    <h3 className="gold-source-name">{source.source}</h3>
-                    <div className={`source-status ${source.status}`}>
-                      {source.status === 'success' ? '●' : '○'}
+          <div className="gold-combined-card">
+            {goldOunceSources[0]?.rates['XAU'] && goldOunceSources[1]?.rates['XAU'] ? (
+              <>
+                <div className="gold-sources-row">
+                  {/* Istanbul */}
+                  <div className="gold-source-item">
+                    <div className="gold-source-header">
+                      <h3 className="gold-source-name">{goldOunceSources[0].source}</h3>
+                      <div className={`source-status ${goldOunceSources[0].status}`}>
+                        {goldOunceSources[0].status === 'success' ? '●' : '○'}
+                      </div>
+                    </div>
+                    <div className="gold-rates-inline">
+                      <div className="gold-rate-item-inline">
+                        <span className="gold-rate-label">Alış</span>
+                        <span className="gold-rate-value">${goldOunceSources[0].rates['XAU'].buy.toFixed(2)}</span>
+                      </div>
+                      <div className="gold-rate-divider-inline"></div>
+                      <div className="gold-rate-item-inline">
+                        <span className="gold-rate-label">Satış</span>
+                        <span className="gold-rate-value">${goldOunceSources[0].rates['XAU'].sell.toFixed(2)}</span>
+                      </div>
                     </div>
                   </div>
-                  
-                  {xauRate ? (
-                    <div className="gold-card-content">
-                      <div className="gold-rates">
-                        <div className="gold-rate-item">
-                          <span className="gold-rate-label">Alış</span>
-                          <span className="gold-rate-value">${xauRate.buy.toFixed(2)}</span>
-                        </div>
-                        <div className="gold-rate-divider"></div>
-                        <div className="gold-rate-item">
-                          <span className="gold-rate-label">Satış</span>
-                          <span className="gold-rate-value">${xauRate.sell.toFixed(2)}</span>
-                        </div>
+
+                  {/* London */}
+                  <div className="gold-source-item">
+                    <div className="gold-source-header">
+                      <h3 className="gold-source-name">{goldOunceSources[1].source}</h3>
+                      <div className={`source-status ${goldOunceSources[1].status}`}>
+                        {goldOunceSources[1].status === 'success' ? '●' : '○'}
                       </div>
-                      
-                      {sellDiff !== 0 && (
-                        <div className="gold-spread">
-                          <span className="spread-label">Satış Farkı:</span>
-                          <div className="spread-values">
-                            <span className={`spread-amount ${sellDiff > 0 ? 'positive' : 'negative'}`}>
-                              {sellDiff > 0 ? '+' : ''}${sellDiff}
-                            </span>
-                            <span className="spread-percent">({sellDiff > 0 ? '+' : ''}{sellDiffPercent}%)</span>
-                          </div>
-                        </div>
-                      )}
                     </div>
-                  ) : (
-                    <div className="no-data">Veri yok</div>
-                  )}
+                    <div className="gold-rates-inline">
+                      <div className="gold-rate-item-inline">
+                        <span className="gold-rate-label">Alış</span>
+                        <span className="gold-rate-value">${goldOunceSources[1].rates['XAU'].buy.toFixed(2)}</span>
+                      </div>
+                      <div className="gold-rate-divider-inline"></div>
+                      <div className="gold-rate-item-inline">
+                        <span className="gold-rate-label">Satış</span>
+                        <span className="gold-rate-value">${goldOunceSources[1].rates['XAU'].sell.toFixed(2)}</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              );
-            })}
+
+                {/* Single Sell Difference */}
+                <div className="gold-spread-combined">
+                  {(() => {
+                    const istanbulSell = goldOunceSources[0].rates['XAU'].sell;
+                    const londonSell = goldOunceSources[1].rates['XAU'].sell;
+                    const sellDiff = (istanbulSell - londonSell).toFixed(2);
+                    const sellDiffPercent = ((sellDiff / londonSell) * 100).toFixed(3);
+                    
+                    return (
+                      <>
+                        <span className="spread-label">Satış Farkı (İstanbul - Londra):</span>
+                        <div className="spread-values">
+                          <span className={`spread-amount ${sellDiff > 0 ? 'positive' : 'negative'}`}>
+                            {sellDiff > 0 ? '+' : ''}${sellDiff}
+                          </span>
+                          <span className="spread-percent">({sellDiff > 0 ? '+' : ''}{sellDiffPercent}%)</span>
+                        </div>
+                      </>
+                    );
+                  })()}
+                </div>
+              </>
+            ) : (
+              <div className="no-data">Veri yok</div>
+            )}
           </div>
         </div>
 
