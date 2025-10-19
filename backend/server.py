@@ -440,8 +440,18 @@ async def root():
 
 @api_router.get("/rates", response_model=AllRatesResponse)
 async def get_rates():
-    """Get exchange rates from all sources"""
+    """Get exchange rates from all sources (with caching)"""
     try:
+        current_time = time.time()
+        
+        # Check if cache is still valid
+        if rates_cache['data'] and (current_time - rates_cache['last_updated']) < rates_cache['cache_duration']:
+            logger.info("Returning cached rates")
+            return rates_cache['data']
+        
+        # Cache expired or doesn't exist, fetch new rates
+        logger.info("Fetching fresh rates from websites")
+        
         # Run all scrapers concurrently
         results = await asyncio.gather(
             scrape_ahlatci(),
@@ -475,10 +485,17 @@ async def get_rates():
             else:
                 final_results.append(result)
         
-        return AllRatesResponse(
+        response = AllRatesResponse(
             sources=final_results,
             timestamp=datetime.now(timezone.utc).isoformat()
         )
+        
+        # Update cache
+        rates_cache['data'] = response
+        rates_cache['last_updated'] = current_time
+        
+        return response
+        
     except Exception as e:
         logger.error(f"Error getting rates: {e}")
         raise HTTPException(status_code=500, detail=str(e))
