@@ -58,42 +58,45 @@ class AllRatesResponse(BaseModel):
 
 # Helper function to get real exchange rates from reliable API
 def get_accurate_rates():
-    """Get accurate exchange rates from exchangeratesapi.io"""
+    """Get accurate exchange rates using free Open Exchange Rates API"""
     try:
-        # Using exchangeratesapi.io - supports TRY base currency
-        # If you have an API key, add it as: ?access_key=YOUR_KEY
-        base_url = "https://api.exchangerate.host/latest"
-        params = {
-            "base": "TRY",
-            "symbols": "USD,EUR,GBP,CHF"
-        }
+        # Using open.er-api.com - free tier, no key required
+        base_url = "https://open.er-api.com/v6/latest/USD"
         
-        response = requests.get(base_url, params=params, timeout=10)
+        response = requests.get(base_url, timeout=10)
         data = response.json()
         
-        if not data.get('success', True):
+        if data.get('result') != 'success':
             raise Exception("API request failed")
         
         rates = data.get('rates', {})
         
-        # Calculate TRY rates (inverse since we want TRY per unit)
-        try_rates = {}
-        for currency in ['USD', 'EUR', 'GBP', 'CHF']:
-            if currency in rates and rates[currency] > 0:
-                try_rates[currency] = 1 / rates[currency]
+        # Get TRY rate and calculate inverses for other currencies
+        try_per_usd = rates.get('TRY', 0)
         
-        # Get gold price from metals-api or another source
+        if try_per_usd == 0:
+            raise Exception("TRY rate not found")
+        
+        # Calculate TRY rates for each currency
+        try_rates = {
+            'USD': try_per_usd,
+            'EUR': try_per_usd / rates.get('EUR', 1) if rates.get('EUR') else 0,
+            'GBP': try_per_usd / rates.get('GBP', 1) if rates.get('GBP') else 0,
+            'CHF': try_per_usd / rates.get('CHF', 1) if rates.get('CHF') else 0
+        }
+        
+        # Get gold price
         try:
-            gold_response = requests.get("https://api.metals.live/v1/spot/gold", timeout=10)
-            gold_data = gold_response.json()
-            # Gold in USD per troy ounce
-            gold_usd = float(gold_data.get('price', 2650))
-            if 'USD' in try_rates:
-                try_rates['XAU'] = gold_usd * try_rates['USD']
+            gold_response = requests.get("https://api.gold-api.com/price/XAU", timeout=10)
+            if gold_response.status_code == 200:
+                gold_data = gold_response.json()
+                gold_usd = float(gold_data.get('price', 2650))
+            else:
+                gold_usd = 2650  # Fallback
+            try_rates['XAU'] = gold_usd * try_per_usd
         except:
             # Fallback gold price
-            if 'USD' in try_rates:
-                try_rates['XAU'] = 2650 * try_rates['USD']
+            try_rates['XAU'] = 2650 * try_per_usd
         
         return try_rates
     except Exception as e:
