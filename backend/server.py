@@ -266,20 +266,23 @@ async def scrape_hakandoviz():
                             logger.error(f"Error parsing {currency} from Hakan: {e}, text: {text}")
                             continue
             
-            # Look for XAU (gold) - format might be HAS/TRY or XAU/USD
-            if 'HAS/TRY' in text or 'XAU' in text:
+            # Look for XAU (gold) - format: HAS/TRY6.090,006.141,00
+            if 'HAS/TRY' in text and 'XAU' not in rates:
                 try:
-                    # Try to extract numbers
-                    import re
-                    numbers = re.findall(r'(\d+\.?\d*),(\d+)', text)
-                    if len(numbers) >= 1:
-                        buy = float(numbers[0][0] + numbers[0][1][:3])
-                        if len(numbers) >= 2:
-                            sell = float(numbers[1][0] + numbers[1][1][:3])
-                        else:
-                            sell = buy * 1.01
+                    # Extract numbers after HAS/TRY
+                    remaining = text.replace('HAS/TRY', '')
+                    # Split by comma - format is like 6.090,006.141,00
+                    parts = remaining.split(',')
+                    
+                    if len(parts) >= 3:
+                        # Format: 6.090,006.141,00 -> buy: 6090.00, sell: 6141.00
+                        buy_str = parts[0].replace('.', '') + '.' + parts[1][:2]
+                        sell_str = parts[1][2:].replace('.', '') + '.' + parts[2][:2]
                         
-                        if 'XAU' not in rates and buy > 100:
+                        buy = float(buy_str)
+                        sell = float(sell_str)
+                        
+                        if buy > 100 and sell > 100:  # Sanity check
                             rates['XAU'] = ExchangeRate(
                                 currency='XAU',
                                 buy=buy,
@@ -287,7 +290,7 @@ async def scrape_hakandoviz():
                             )
                             logger.info(f"Hakan Doviz - XAU: Buy={buy}, Sell={sell}")
                 except Exception as e:
-                    logger.error(f"Error parsing gold from Hakan: {e}")
+                    logger.error(f"Error parsing gold from Hakan: {e}, text: {text}")
         
         return SourceRates(
             source="Hakan Döviz",
