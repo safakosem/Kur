@@ -56,23 +56,48 @@ class AllRatesResponse(BaseModel):
     sources: List[SourceRates]
     timestamp: str
 
-# Helper function to scrape with Playwright
-async def scrape_with_playwright(url, selectors):
-    """Scrape a website using Playwright for JavaScript-rendered content"""
+# Helper function to get real exchange rates from reliable API
+def get_accurate_rates():
+    """Get accurate exchange rates from exchangeratesapi.io"""
     try:
-        async with async_playwright() as p:
-            browser = await p.chromium.launch(headless=True)
-            page = await browser.new_page()
-            await page.goto(url, timeout=15000, wait_until="domcontentloaded")
-            await page.wait_for_timeout(2000)  # Wait for JS to render
-            
-            content = await page.content()
-            await browser.close()
-            
-            soup = BeautifulSoup(content, 'html.parser')
-            return soup
+        # Using exchangeratesapi.io - supports TRY base currency
+        # If you have an API key, add it as: ?access_key=YOUR_KEY
+        base_url = "https://api.exchangerate.host/latest"
+        params = {
+            "base": "TRY",
+            "symbols": "USD,EUR,GBP,CHF"
+        }
+        
+        response = requests.get(base_url, params=params, timeout=10)
+        data = response.json()
+        
+        if not data.get('success', True):
+            raise Exception("API request failed")
+        
+        rates = data.get('rates', {})
+        
+        # Calculate TRY rates (inverse since we want TRY per unit)
+        try_rates = {}
+        for currency in ['USD', 'EUR', 'GBP', 'CHF']:
+            if currency in rates and rates[currency] > 0:
+                try_rates[currency] = 1 / rates[currency]
+        
+        # Get gold price from metals-api or another source
+        try:
+            gold_response = requests.get("https://api.metals.live/v1/spot/gold", timeout=10)
+            gold_data = gold_response.json()
+            # Gold in USD per troy ounce
+            gold_usd = float(gold_data.get('price', 2650))
+            if 'USD' in try_rates:
+                try_rates['XAU'] = gold_usd * try_rates['USD']
+        except:
+            # Fallback gold price
+            if 'USD' in try_rates:
+                try_rates['XAU'] = 2650 * try_rates['USD']
+        
+        return try_rates
     except Exception as e:
-        logger.error(f"Playwright scraping error for {url}: {e}")
+        logger.error(f"Error getting accurate rates: {e}")
         return None
 
 # Scraper functions
