@@ -124,3 +124,5 @@ frontend/build/doviz-windows-app.tar.gz
 frontend/dist/mac-arm64/Electron.app/Contents/Frameworks/Electron
 Framework.framework/Versions/A/Electron
 Framework
+frontend/public/doviz-mac-app.tar.gz
+frontend/dist/doviz-mac-app.tar.gz
