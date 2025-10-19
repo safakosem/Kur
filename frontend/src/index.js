@@ -8,6 +8,15 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <App />
-    <Toaster position="top-right" richColors />
+    <Toaster 
+      position="top-left" 
+      richColors 
+      toastOptions={{
+        style: {
+          fontSize: '0.875rem',
+          padding: '0.75rem 1rem',
+        }
+      }}
+    />
   </React.StrictMode>
 );
