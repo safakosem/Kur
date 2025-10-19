@@ -123,6 +123,16 @@ body {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
   overflow: hidden;
   border: 2px solid #f0e6d2;
+  margin-bottom: 2rem;
+}
+
+.table-title {
+  background: linear-gradient(135deg, #b8860b 0%, #d4a574 100%);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: 0.02em;
 }
 
 .rates-table {
