@@ -1,30 +1,22 @@
 import { useState, useEffect } from "react";
 import "@/App.css";
 import axios from "axios";
-import { RefreshCw, TrendingUp, TrendingDown, AlertCircle } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-const CURRENCY_NAMES = {
-  USD: "US Dollar",
-  EUR: "Euro",
-  GBP: "British Pound",
-  CHF: "Swiss Franc",
-  XAU: "Gold (Troy Ounce)"
+const CURRENCY_INFO = {
+  USD: { name: "Dolar", symbol: "$" },
+  EUR: { name: "Euro", symbol: "€" },
+  GBP: { name: "Sterlin", symbol: "£" },
+  CHF: { name: "Frank", symbol: "CHF" },
+  XAU: { name: "Altın", symbol: "🪙" }
 };
 
-const CURRENCY_SYMBOLS = {
-  USD: "$",
-  EUR: "€",
-  GBP: "£",
-  CHF: "CHF",
-  XAU: "🪙"
-};
+const CURRENCIES = ['USD', 'EUR', 'GBP', 'CHF', 'XAU'];
 
 function App() {
   const [rates, setRates] = useState(null);
@@ -46,11 +38,11 @@ function App() {
       setLastUpdate(new Date(response.data.timestamp));
       
       if (isRefresh) {
-        toast.success("Rates updated successfully");
+        toast.success("Kurlar güncellendi");
       }
     } catch (error) {
       console.error("Error fetching rates:", error);
-      toast.error("Failed to fetch rates");
+      toast.error("Kurlar alınamadı");
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -59,7 +51,6 @@ function App() {
 
   useEffect(() => {
     fetchRates();
-    // Auto-refresh every 1 second if enabled
     if (autoRefresh) {
       const interval = setInterval(() => fetchRates(true), 1000);
       return () => clearInterval(interval);
@@ -78,8 +69,6 @@ function App() {
     
     if (validRates.length === 0) return null;
     
-    // For buying, customer wants lowest price (best for them to buy)
-    // For selling, customer wants highest price (best for them to sell)
     const best = type === 'buy' 
       ? validRates.reduce((min, curr) => curr.rate < min.rate ? curr : min)
       : validRates.reduce((max, curr) => curr.rate > max.rate ? curr : max);
@@ -97,145 +86,119 @@ function App() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <RefreshCw className="w-12 h-12 animate-spin mx-auto text-amber-600 mb-4" />
-          <p className="text-lg" data-testid="loading-text">Loading exchange rates...</p>
+          <p className="text-lg" data-testid="loading-text">Kurlar yükleniyor...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="App min-h-screen">
+    <div className="App" data-testid="app-container">
       {/* Header */}
-      <header className="header-section" data-testid="app-header">
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-2" data-testid="app-title">
-                Döviz Karşılaştırma
-              </h1>
-              <p className="text-base sm:text-lg opacity-90" data-testid="app-subtitle">
-                Anlık kur fiyatlarını karşılaştırın
+      <header className="app-header" data-testid="app-header">
+        <div className="header-content">
+          <div className="header-left">
+            <h1 className="app-title" data-testid="app-title">Döviz Karşılaştırma</h1>
+            {lastUpdate && (
+              <p className="last-update" data-testid="last-update">
+                Son güncelleme: {lastUpdate.toLocaleString('tr-TR')}
               </p>
-            </div>
-            <div className="flex gap-3 items-center">
-              <Button
-                onClick={() => setAutoRefresh(!autoRefresh)}
-                variant={autoRefresh ? "default" : "outline"}
-                className={autoRefresh ? "auto-refresh-btn active" : "auto-refresh-btn"}
-                data-testid="auto-refresh-toggle"
-              >
-                {autoRefresh ? "Otomatik Yenileme Açık" : "Otomatik Yenileme Kapalı"}
-              </Button>
-              <Button
-                onClick={() => fetchRates(true)}
-                disabled={refreshing}
-                className="refresh-btn"
-                data-testid="refresh-button"
-              >
-                <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-                Yenile
-              </Button>
-            </div>
+            )}
           </div>
-          {lastUpdate && (
-            <p className="text-sm mt-4 opacity-75" data-testid="last-update">
-              Son güncelleme: {lastUpdate.toLocaleString('tr-TR')}
-            </p>
-          )}
+          <div className="header-actions">
+            <Button
+              onClick={() => setAutoRefresh(!autoRefresh)}
+              variant={autoRefresh ? "default" : "outline"}
+              className={autoRefresh ? "toggle-btn active" : "toggle-btn"}
+              data-testid="auto-refresh-toggle"
+            >
+              {autoRefresh ? "Otomatik Yenileme Açık" : "Otomatik Yenileme Kapalı"}
+            </Button>
+            <Button
+              onClick={() => fetchRates(true)}
+              disabled={refreshing}
+              className="refresh-btn"
+              data-testid="refresh-button"
+            >
+              <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+              Yenile
+            </Button>
+          </div>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-8" data-testid="main-content">
-        {/* Currency Sections */}
-        {Object.keys(CURRENCY_NAMES).map(currency => (
-          <div key={currency} className="mb-12" data-testid={`currency-section-${currency}`}>
-            <div className="currency-header">
-              <span className="currency-symbol">{CURRENCY_SYMBOLS[currency]}</span>
-              <h2 className="text-2xl font-bold">{CURRENCY_NAMES[currency]}</h2>
-              <span className="currency-code">{currency}/TRY</span>
-            </div>
-
-            <div className="rates-grid">
+      {/* Main Content - Compact Table View */}
+      <main className="main-content" data-testid="main-content">
+        <div className="rates-table-container">
+          <table className="rates-table">
+            <thead>
+              <tr>
+                <th className="source-header">Kaynak</th>
+                {CURRENCIES.map(currency => (
+                  <th key={currency} className="currency-header">
+                    <div className="currency-header-content">
+                      <span className="currency-symbol">{CURRENCY_INFO[currency].symbol}</span>
+                      <span className="currency-name">{CURRENCY_INFO[currency].name}</span>
+                    </div>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
               {rates?.sources?.map((source, idx) => (
-                <Card 
-                  key={idx} 
-                  className={`rate-card ${source.status === 'error' ? 'error-card' : ''}`}
-                  data-testid={`rate-card-${currency}-${source.source.replace(/\s+/g, '-')}`}
-                >
-                  <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
-                      <span className="text-lg" data-testid={`source-name-${idx}`}>{source.source}</span>
-                      {source.status === 'error' ? (
-                        <Badge variant="destructive" data-testid={`status-error-${idx}`}>
-                          <AlertCircle className="w-3 h-3 mr-1" />
-                          Hata
-                        </Badge>
-                      ) : (
-                        <Badge variant="outline" className="success-badge" data-testid={`status-success-${idx}`}>
-                          Aktif
-                        </Badge>
-                      )}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {source.status === 'error' ? (
-                      <p className="text-sm text-muted-foreground" data-testid={`error-message-${idx}`}>
-                        Veri alınamadı
-                      </p>
-                    ) : source.rates[currency] ? (
-                      <div className="rate-display">
-                        <div className="rate-item">
-                          <span className="rate-label">Alış</span>
-                          <div className="rate-value-container">
+                <tr key={idx} className="source-row" data-testid={`source-row-${source.source.replace(/\s+/g, '-')}`}>
+                  <td className="source-cell">
+                    <div className="source-name">{source.source}</div>
+                    <div className={`source-status ${source.status}`}>
+                      {source.status === 'success' ? '●' : '○'}
+                    </div>
+                  </td>
+                  {CURRENCIES.map(currency => (
+                    <td key={currency} className="rate-cell" data-testid={`rate-${currency}-${idx}`}>
+                      {source.rates[currency] ? (
+                        <div className="rate-content">
+                          <div className="rate-row">
+                            <span className="rate-label">A:</span>
                             <span 
                               className={`rate-value ${isBestRate(source.source, currency, 'buy', source.rates[currency].buy) ? 'best-rate' : ''}`}
-                              data-testid={`buy-rate-${idx}`}
+                              data-testid={`buy-${currency}-${idx}`}
                             >
-                              ₺{source.rates[currency].buy.toFixed(4)}
+                              {currency === 'XAU' 
+                                ? source.rates[currency].buy.toFixed(2)
+                                : source.rates[currency].buy.toFixed(4)
+                              }
                             </span>
-                            {isBestRate(source.source, currency, 'buy', source.rates[currency].buy) && (
-                              <TrendingDown className="w-4 h-4 text-green-600 ml-2" data-testid={`best-buy-icon-${idx}`} />
-                            )}
                           </div>
-                        </div>
-                        <div className="rate-divider"></div>
-                        <div className="rate-item">
-                          <span className="rate-label">Satış</span>
-                          <div className="rate-value-container">
+                          <div className="rate-row">
+                            <span className="rate-label">S:</span>
                             <span 
                               className={`rate-value ${isBestRate(source.source, currency, 'sell', source.rates[currency].sell) ? 'best-rate' : ''}`}
-                              data-testid={`sell-rate-${idx}`}
+                              data-testid={`sell-${currency}-${idx}`}
                             >
-                              ₺{source.rates[currency].sell.toFixed(4)}
+                              {currency === 'XAU'
+                                ? source.rates[currency].sell.toFixed(2)
+                                : source.rates[currency].sell.toFixed(4)
+                              }
                             </span>
-                            {isBestRate(source.source, currency, 'sell', source.rates[currency].sell) && (
-                              <TrendingUp className="w-4 h-4 text-green-600 ml-2" data-testid={`best-sell-icon-${idx}`} />
-                            )}
                           </div>
                         </div>
-                      </div>
-                    ) : (
-                      <p className="text-sm text-muted-foreground" data-testid={`no-data-${idx}`}>
-                        Bu kur için veri yok
-                      </p>
-                    )}
-                  </CardContent>
-                </Card>
+                      ) : (
+                        <div className="no-data">-</div>
+                      )}
+                    </td>
+                  ))}
+                </tr>
               ))}
-            </div>
-          </div>
-        ))}
-      </main>
-
-      {/* Footer */}
-      <footer className="footer-section" data-testid="app-footer">
-        <div className="container mx-auto px-4 py-6 text-center">
-          <p className="text-sm opacity-75">
-            Kurlar kaynaklardan anlık olarak çekilmektedir. Lütfen işlem yapmadan önce ilgili kurumla doğrulayın.
-          </p>
+            </tbody>
+          </table>
         </div>
-      </footer>
+
+        <div className="legend">
+          <span className="legend-item"><span className="best-indicator"></span> En iyi kur</span>
+          <span className="legend-item">A: Alış</span>
+          <span className="legend-item">S: Satış</span>
+        </div>
+      </main>
     </div>
   );
 }
