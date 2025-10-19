@@ -380,6 +380,51 @@ function App() {
           <span className="legend-item">S: Satış</span>
         </div>
       </main>
+
+      {/* Calculator Modal */}
+      {showCalculator && (
+        <div className="calculator-modal-overlay" onClick={() => setShowCalculator(false)}>
+          <div className="calculator-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="calculator-header">
+              <h3 className="calculator-title">Hesap Makinesi</h3>
+              <button 
+                className="calculator-close"
+                onClick={() => setShowCalculator(false)}
+                aria-label="Kapat"
+              >
+                ×
+              </button>
+            </div>
+            <div className="calculator-body">
+              <div className="calculator-display">{calcDisplay}</div>
+              <div className="calculator-buttons">
+                <button onClick={handleCalcClear} className="calc-btn calc-btn-function">AC</button>
+                <button onClick={handleCalcClearEntry} className="calc-btn calc-btn-function">C</button>
+                <button onClick={() => handleCalcOperation('÷')} className="calc-btn calc-btn-operation">÷</button>
+                <button onClick={() => handleCalcOperation('×')} className="calc-btn calc-btn-operation">×</button>
+                
+                <button onClick={() => handleCalcNumber(7)} className="calc-btn">7</button>
+                <button onClick={() => handleCalcNumber(8)} className="calc-btn">8</button>
+                <button onClick={() => handleCalcNumber(9)} className="calc-btn">9</button>
+                <button onClick={() => handleCalcOperation('-')} className="calc-btn calc-btn-operation">-</button>
+                
+                <button onClick={() => handleCalcNumber(4)} className="calc-btn">4</button>
+                <button onClick={() => handleCalcNumber(5)} className="calc-btn">5</button>
+                <button onClick={() => handleCalcNumber(6)} className="calc-btn">6</button>
+                <button onClick={() => handleCalcOperation('+')} className="calc-btn calc-btn-operation">+</button>
+                
+                <button onClick={() => handleCalcNumber(1)} className="calc-btn">1</button>
+                <button onClick={() => handleCalcNumber(2)} className="calc-btn">2</button>
+                <button onClick={() => handleCalcNumber(3)} className="calc-btn">3</button>
+                <button onClick={handleCalcEquals} className="calc-btn calc-btn-equals" style={{gridRow: 'span 2'}}>=</button>
+                
+                <button onClick={() => handleCalcNumber(0)} className="calc-btn" style={{gridColumn: 'span 2'}}>0</button>
+                <button onClick={handleCalcDecimal} className="calc-btn">.</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
