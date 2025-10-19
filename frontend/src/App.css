@@ -1,34 +1,207 @@
-.App-logo {
-    height: 40vmin;
-    pointer-events: none;
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-    .App-logo {
-        animation: App-logo-spin infinite 20s linear;
-    }
+body {
+  font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg, #fdfbf7 0%, #f8f4ec 50%, #fef9f0 100%);
+  color: #2c2c2c;
 }
 
-.App-header {
-    background-color: #0f0f10;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: calc(10px + 2vmin);
-    color: white;
+.App {
+  min-height: 100vh;
 }
 
-.App-link {
-    color: #61dafb;
+/* Header Section */
+.header-section {
+  background: linear-gradient(135deg, #fef5e7 0%, #fdebd0 100%);
+  border-bottom: 3px solid #d4a574;
+  box-shadow: 0 4px 20px rgba(212, 165, 116, 0.1);
 }
 
-@keyframes App-logo-spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
+.header-section h1 {
+  background: linear-gradient(135deg, #b8860b 0%, #d4a574 50%, #daa520 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.refresh-btn {
+  background: linear-gradient(135deg, #d4a574 0%, #b8860b 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(184, 134, 11, 0.2);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.refresh-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(184, 134, 11, 0.3);
+  background: linear-gradient(135deg, #daa520 0%, #b8860b 100%);
+}
+
+.refresh-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Currency Header */
+.currency-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 1.5rem;
+  background: white;
+  border-radius: 16px;
+  border: 2px solid #f0e6d2;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+}
+
+.currency-symbol {
+  font-size: 2.5rem;
+  filter: drop-shadow(0 2px 4px rgba(212, 165, 116, 0.3));
+}
+
+.currency-code {
+  margin-left: auto;
+  background: linear-gradient(135deg, #fef5e7 0%, #fdebd0 100%);
+  color: #b8860b;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.875rem;
+  border: 1px solid #d4a574;
+}
+
+/* Rates Grid */
+.rates-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.rate-card {
+  background: white;
+  border: 2px solid #f5f5f5;
+  border-radius: 16px;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.rate-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  border-color: #d4a574;
+}
+
+.error-card {
+  border-color: #fee;
+  background: #fffafa;
+}
+
+.success-badge {
+  background: #f0fdf4;
+  color: #16a34a;
+  border-color: #bbf7d0;
+}
+
+/* Rate Display */
+.rate-display {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.rate-item {
+  flex: 1;
+  text-align: center;
+}
+
+.rate-label {
+  display: block;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #6b7280;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.rate-value-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rate-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1f2937;
+  transition: color 0.2s;
+}
+
+.rate-value.best-rate {
+  color: #16a34a;
+  text-shadow: 0 0 20px rgba(22, 163, 74, 0.15);
+}
+
+.rate-divider {
+  width: 1px;
+  height: 50px;
+  background: linear-gradient(to bottom, transparent, #e5e7eb, transparent);
+}
+
+/* Footer */
+.footer-section {
+  background: linear-gradient(135deg, #fef5e7 0%, #fdebd0 100%);
+  border-top: 2px solid #d4a574;
+  margin-top: 4rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .header-section h1 {
+    font-size: 2rem;
+  }
+  
+  .currency-header {
+    flex-wrap: wrap;
+  }
+  
+  .currency-symbol {
+    font-size: 2rem;
+  }
+  
+  .rates-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .rate-value {
+    font-size: 1.25rem;
+  }
+}
+
+/* Loading Animation */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
 }

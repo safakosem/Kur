@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI, APIRouter, HTTPException
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -6,10 +6,14 @@ import os
 import logging
 from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict
-from typing import List
+from typing import List, Dict, Optional
 import uuid
 from datetime import datetime, timezone
-
+import requests
+from bs4 import BeautifulSoup
+import re
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -25,46 +29,268 @@ app = FastAPI()
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
 
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
-# Define Models
-class StatusCheck(BaseModel):
-    model_config = ConfigDict(extra="ignore")  # Ignore MongoDB's _id field
-    
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    client_name: str
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+# Models
+class ExchangeRate(BaseModel):
+    currency: str
+    buy: float
+    sell: float
 
-class StatusCheckCreate(BaseModel):
-    client_name: str
+class SourceRates(BaseModel):
+    source: str
+    url: str
+    rates: Dict[str, ExchangeRate]
+    last_updated: str
+    status: str  # 'success' or 'error'
+    error_message: Optional[str] = None
 
-# Add your routes to the router instead of directly to app
+class AllRatesResponse(BaseModel):
+    sources: List[SourceRates]
+    timestamp: str
+
+# Scraper functions
+def scrape_ahlatci():
+    """Scrape rates from Ahlatcı Döviz"""
+    try:
+        url = "https://www.ahlatcidoviz.com.tr"
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        }
+        response = requests.get(url, headers=headers, timeout=10)
+        soup = BeautifulSoup(response.content, 'html.parser')
+        
+        rates = {}
+        # Find all rate rows in the table
+        rows = soup.find_all('tr')
+        
+        for row in rows:
+            cols = row.find_all('td')
+            if len(cols) >= 3:
+                currency_code = cols[0].get_text(strip=True)
+                if currency_code in ['USD', 'EUR', 'GBP', 'CHF', 'XAU']:
+                    try:
+                        buy = float(cols[1].get_text(strip=True).replace(',', ''))
+                        sell = float(cols[2].get_text(strip=True).replace(',', ''))
+                        rates[currency_code] = ExchangeRate(
+                            currency=currency_code,
+                            buy=buy,
+                            sell=sell
+                        )
+                    except (ValueError, AttributeError) as e:
+                        logger.error(f"Error parsing {currency_code} for Ahlatci: {e}")
+                        continue
+        
+        return SourceRates(
+            source="Ahlatcı Döviz",
+            url=url,
+            rates=rates,
+            last_updated=datetime.now(timezone.utc).isoformat(),
+            status="success"
+        )
+    except Exception as e:
+        logger.error(f"Error scraping Ahlatci: {e}")
+        return SourceRates(
+            source="Ahlatcı Döviz",
+            url="https://www.ahlatcidoviz.com.tr",
+            rates={},
+            last_updated=datetime.now(timezone.utc).isoformat(),
+            status="error",
+            error_message=str(e)
+        )
+
+def scrape_haremaltin():
+    """Scrape rates from Harem Altın"""
+    try:
+        url = "https://www.haremaltin.com/?lang=en"
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        }
+        response = requests.get(url, headers=headers, timeout=10)
+        soup = BeautifulSoup(response.content, 'html.parser')
+        
+        rates = {}
+        # Find rate elements - adjust selectors based on actual HTML structure
+        rate_elements = soup.find_all(['tr', 'div'], class_=re.compile(r'rate|currency|price', re.I))
+        
+        for elem in rate_elements:
+            text = elem.get_text()
+            # Look for currency codes and prices
+            for currency in ['USD', 'EUR', 'GBP', 'CHF', 'XAU']:
+                if currency in text:
+                    # Try to extract numbers
+                    numbers = re.findall(r'\d+[\.,]?\d*', text)
+                    if len(numbers) >= 2:
+                        try:
+                            buy = float(numbers[0].replace(',', '.'))
+                            sell = float(numbers[1].replace(',', '.'))
+                            if currency not in rates:
+                                rates[currency] = ExchangeRate(
+                                    currency=currency,
+                                    buy=buy,
+                                    sell=sell
+                                )
+                        except ValueError:
+                            continue
+        
+        return SourceRates(
+            source="Harem Altın",
+            url=url,
+            rates=rates,
+            last_updated=datetime.now(timezone.utc).isoformat(),
+            status="success" if rates else "error",
+            error_message="Could not parse rates" if not rates else None
+        )
+    except Exception as e:
+        logger.error(f"Error scraping Harem Altin: {e}")
+        return SourceRates(
+            source="Harem Altın",
+            url="https://www.haremaltin.com/?lang=en",
+            rates={},
+            last_updated=datetime.now(timezone.utc).isoformat(),
+            status="error",
+            error_message=str(e)
+        )
+
+def scrape_hakandoviz():
+    """Scrape rates from Hakan Döviz"""
+    try:
+        url = "https://www.hakandoviz.com/canli-piyasalar"
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        }
+        response = requests.get(url, headers=headers, timeout=10)
+        soup = BeautifulSoup(response.content, 'html.parser')
+        
+        rates = {}
+        # Find all rate containers
+        rate_elements = soup.find_all(['tr', 'div', 'li'], class_=re.compile(r'rate|currency|price|piyasa', re.I))
+        
+        for elem in rate_elements:
+            text = elem.get_text()
+            for currency in ['USD', 'EUR', 'GBP', 'CHF', 'XAU']:
+                if currency in text:
+                    numbers = re.findall(r'\d+[\.,]?\d*', text)
+                    if len(numbers) >= 2:
+                        try:
+                            buy = float(numbers[0].replace(',', '.'))
+                            sell = float(numbers[1].replace(',', '.'))
+                            if currency not in rates:
+                                rates[currency] = ExchangeRate(
+                                    currency=currency,
+                                    buy=buy,
+                                    sell=sell
+                                )
+                        except ValueError:
+                            continue
+        
+        return SourceRates(
+            source="Hakan Döviz",
+            url=url,
+            rates=rates,
+            last_updated=datetime.now(timezone.utc).isoformat(),
+            status="success" if rates else "error",
+            error_message="Could not parse rates" if not rates else None
+        )
+    except Exception as e:
+        logger.error(f"Error scraping Hakan Doviz: {e}")
+        return SourceRates(
+            source="Hakan Döviz",
+            url="https://www.hakandoviz.com/canli-piyasalar",
+            rates={},
+            last_updated=datetime.now(timezone.utc).isoformat(),
+            status="error",
+            error_message=str(e)
+        )
+
+def scrape_carsidoviz():
+    """Scrape rates from Çarşı Döviz"""
+    try:
+        url = "https://carsidoviz.com"
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        }
+        response = requests.get(url, headers=headers, timeout=10)
+        soup = BeautifulSoup(response.content, 'html.parser')
+        
+        rates = {}
+        # Find all rate elements
+        rate_elements = soup.find_all(['tr', 'div', 'li'], class_=re.compile(r'rate|currency|price|doviz', re.I))
+        
+        for elem in rate_elements:
+            text = elem.get_text()
+            for currency in ['USD', 'EUR', 'GBP', 'CHF', 'XAU']:
+                if currency in text:
+                    numbers = re.findall(r'\d+[\.,]?\d*', text)
+                    if len(numbers) >= 2:
+                        try:
+                            buy = float(numbers[0].replace(',', '.'))
+                            sell = float(numbers[1].replace(',', '.'))
+                            if currency not in rates:
+                                rates[currency] = ExchangeRate(
+                                    currency=currency,
+                                    buy=buy,
+                                    sell=sell
+                                )
+                        except ValueError:
+                            continue
+        
+        return SourceRates(
+            source="Çarşı Döviz",
+            url=url,
+            rates=rates,
+            last_updated=datetime.now(timezone.utc).isoformat(),
+            status="success" if rates else "error",
+            error_message="Could not parse rates" if not rates else None
+        )
+    except Exception as e:
+        logger.error(f"Error scraping Carsi Doviz: {e}")
+        return SourceRates(
+            source="Çarşı Döviz",
+            url="https://carsidoviz.com",
+            rates={},
+            last_updated=datetime.now(timezone.utc).isoformat(),
+            status="error",
+            error_message=str(e)
+        )
+
+# API endpoints
 @api_router.get("/")
 async def root():
-    return {"message": "Hello World"}
+    return {"message": "Currency Exchange Rate Comparison API"}
 
-@api_router.post("/status", response_model=StatusCheck)
-async def create_status_check(input: StatusCheckCreate):
-    status_dict = input.model_dump()
-    status_obj = StatusCheck(**status_dict)
-    
-    # Convert to dict and serialize datetime to ISO string for MongoDB
-    doc = status_obj.model_dump()
-    doc['timestamp'] = doc['timestamp'].isoformat()
-    
-    _ = await db.status_checks.insert_one(doc)
-    return status_obj
+@api_router.get("/rates", response_model=AllRatesResponse)
+async def get_rates():
+    """Get exchange rates from all sources"""
+    try:
+        # Run all scrapers in parallel using thread pool
+        loop = asyncio.get_event_loop()
+        with ThreadPoolExecutor(max_workers=4) as executor:
+            futures = [
+                loop.run_in_executor(executor, scrape_ahlatci),
+                loop.run_in_executor(executor, scrape_haremaltin),
+                loop.run_in_executor(executor, scrape_hakandoviz),
+                loop.run_in_executor(executor, scrape_carsidoviz)
+            ]
+            results = await asyncio.gather(*futures)
+        
+        return AllRatesResponse(
+            sources=results,
+            timestamp=datetime.now(timezone.utc).isoformat()
+        )
+    except Exception as e:
+        logger.error(f"Error getting rates: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
-@api_router.get("/status", response_model=List[StatusCheck])
-async def get_status_checks():
-    # Exclude MongoDB's _id field from the query results
-    status_checks = await db.status_checks.find({}, {"_id": 0}).to_list(1000)
-    
-    # Convert ISO string timestamps back to datetime objects
-    for check in status_checks:
-        if isinstance(check['timestamp'], str):
-            check['timestamp'] = datetime.fromisoformat(check['timestamp'])
-    
-    return status_checks
+@api_router.get("/rates/refresh", response_model=AllRatesResponse)
+async def refresh_rates():
+    """Force refresh rates from all sources"""
+    return await get_rates()
 
 # Include the router in the main app
 app.include_router(api_router)
@@ -76,13 +302,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
