@@ -177,7 +177,7 @@
         
         <div class="download-section">
             <!-- Mac Download -->
-            <div class="platform-card">
+            <div class="platform-card" style="background: linear-gradient(135deg, #fff3cd 0%, #ffe5a0 100%); border-color: #ffc107;">
                 <div class="platform-header">
                     <div class="platform-icon">🍎</div>
                     <div class="platform-info">
@@ -186,28 +186,36 @@
                     </div>
                 </div>
                 
-                <p style="margin-bottom: 20px;">
-                    Native Mac application for Apple Silicon Macs
-                </p>
-                
-                <div class="file-info">
-                    <strong>📦 File:</strong> doviz-mac-app.tar.gz<br>
-                    <strong>📊 Size:</strong> 107 MB (compressed)<br>
-                    <strong>💻 Contains:</strong> Electron.app + dependencies
+                <div class="note" style="margin: 20px 0;">
+                    <strong>⚠️ Mac Build Limitation:</strong><br>
+                    Due to Apple's restrictions, proper Mac installers (.dmg) can only be created on macOS. 
+                    However, you can use the <strong>PWA (Progressive Web App)</strong> instead, which works perfectly on Mac!
                 </div>
                 
-                <a href="/doviz-mac-app.tar.gz" class="download-btn" download style="margin-top: 20px;">
-                    ⬇️ Download Mac App (107 MB)
-                </a>
+                <p style="margin-bottom: 20px;">
+                    <strong>Alternative Options:</strong>
+                </p>
                 
                 <div class="instructions">
-                    <h3>Installation Instructions:</h3>
+                    <h3>Option 1: Use PWA (Recommended) ⭐</h3>
                     <ol>
-                        <li>Click the download button above</li>
-                        <li>Extract the archive (double-click or use: <code>tar -xzf doviz-mac-app.tar.gz</code>)</li>
-                        <li>Navigate to <code>mac-arm64</code> folder</li>
-                        <li>Drag <code>Electron.app</code> to your Applications folder</li>
-                        <li>Right-click and select "Open" (first time only)</li>
+                        <li>Open Safari on your Mac</li>
+                        <li>Go to: <code>https://currencyexpert-1.preview.emergentagent.com</code></li>
+                        <li>Click the Share button in the toolbar</li>
+                        <li>Select "Add to Dock"</li>
+                        <li>The app will work like a native Mac application!</li>
+                    </ol>
+                    
+                    <h3 style="margin-top: 20px;">Option 2: Run in Browser</h3>
+                    <p>Simply bookmark the app and use it directly in your browser.</p>
+                    
+                    <h3 style="margin-top: 20px;">Option 3: Build on Mac</h3>
+                    <p>If you have a Mac, you can build the proper installer:</p>
+                    <ol>
+                        <li>Clone the repository on your Mac</li>
+                        <li>Run: <code>cd frontend && yarn install</code></li>
+                        <li>Run: <code>yarn electron-build-mac</code></li>
+                        <li>The .dmg file will be in the <code>dist</code> folder</li>
                     </ol>
                 </div>
             </div>
