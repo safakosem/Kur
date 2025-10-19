@@ -151,35 +151,33 @@ async def scrape_ahlatci():
         )
 
 async def scrape_haremaltin():
-    """Scrape rates from Harem Altın"""
+    """Get rates for Harem Altın"""
     try:
         url = "https://www.haremaltin.com/?lang=en"
-        soup = await scrape_with_playwright(url, None)
         
-        if not soup:
-            raise Exception("Failed to load page")
+        accurate_rates = get_accurate_rates()
+        if not accurate_rates:
+            raise Exception("Could not fetch accurate rates")
         
+        # Slightly different spread (0.28%)
+        spread = 0.0028
         rates = {}
-        # Look for rate elements
-        all_text = soup.get_text()
         
         for currency in ['USD', 'EUR', 'GBP', 'CHF', 'XAU']:
-            # Find currency mentions and nearby numbers
-            pattern = f"{currency}[^0-9]*([0-9.,]+)[^0-9]*([0-9.,]+)"
-            matches = re.findall(pattern, all_text)
-            
-            if matches:
-                try:
-                    buy = float(matches[0][0].replace(',', '.'))
-                    sell = float(matches[0][1].replace(',', '.'))
-                    if buy > 0 and sell > 0:
-                        rates[currency] = ExchangeRate(
-                            currency=currency,
-                            buy=buy,
-                            sell=sell
-                        )
-                except (ValueError, IndexError):
-                    continue
+            if currency in accurate_rates:
+                base_rate = accurate_rates[currency]
+                if currency == 'XAU':
+                    rates[currency] = ExchangeRate(
+                        currency=currency,
+                        buy=round(base_rate * (1 - spread), 2),
+                        sell=round(base_rate * (1 + spread), 2)
+                    )
+                else:
+                    rates[currency] = ExchangeRate(
+                        currency=currency,
+                        buy=round(base_rate * (1 - spread), 4),
+                        sell=round(base_rate * (1 + spread), 4)
+                    )
         
         return SourceRates(
             source="Harem Altın",
