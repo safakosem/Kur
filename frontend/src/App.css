@@ -116,6 +116,25 @@ body {
   background: linear-gradient(135deg, #818cf8 0%, #6366f1 100%);
 }
 
+.download-page-btn {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: none;
+  padding: 0.625rem 1.25rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.download-page-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+  background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+}
+
 .refresh-btn:hover:not(:disabled) {
   transform: translateY(-1px);
   box-shadow: 0 4px 16px rgba(184, 134, 11, 0.3);
