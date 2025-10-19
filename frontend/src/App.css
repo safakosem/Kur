@@ -379,12 +379,6 @@ body {
   border-radius: 8px;
   padding: 0.75rem;
   display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.spread-row {
-  display: flex;
   justify-content: space-between;
   align-items: center;
 }
