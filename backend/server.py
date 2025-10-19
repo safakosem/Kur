@@ -31,7 +31,8 @@ db = client[os.environ['DB_NAME']]
 rates_cache = {
     'data': None,
     'last_updated': 0,
-    'cache_duration': 5  # Cache for 5 seconds
+    'cache_duration': 5,  # Cache for 5 seconds
+    'updating': False  # Flag to prevent multiple simultaneous updates
 }
 
 # Create the main app without a prefix
