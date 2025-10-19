@@ -1,7 +1,11 @@
 {
-  "name": "frontend",
-  "version": "0.1.0",
+  "name": "doviz-karsilastirma",
+  "version": "1.0.0",
+  "description": "Real-time currency and gold exchange rate comparison application",
+  "author": "Your Name",
   "private": true,
+  "main": "electron.js",
+  "homepage": "./",
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",
     "@radix-ui/react-accordion": "^1.2.8",
