@@ -202,7 +202,22 @@ function App() {
 
         {/* Gold Ounce Rates - Separate Section */}
         <div className="gold-ounce-section">
-          <div className="table-title">Altın Ons Kurları (XAU/USD)</div>
+          <div className="gold-ounce-header">
+            <div className="table-title">Altın Ons Kurları (XAU/USD)</div>
+            <div className="gold-calculator">
+              <label className="calculator-label">Hesapla:</label>
+              <input 
+                type="number" 
+                className="calculator-input"
+                value={calculatorOunces}
+                onChange={(e) => setCalculatorOunces(e.target.value)}
+                min="0.01"
+                step="0.01"
+                placeholder="Ons"
+              />
+              <span className="calculator-unit">ons</span>
+            </div>
+          </div>
           <div className="gold-combined-card">
             {goldOunceSources[0]?.rates['XAU'] && goldOunceSources[1]?.rates['XAU'] ? (
               <>
@@ -218,12 +233,12 @@ function App() {
                     <div className="gold-rates-inline">
                       <div className="gold-rate-item-inline">
                         <span className="gold-rate-label">Alış</span>
-                        <span className="gold-rate-value">${goldOunceSources[0].rates['XAU'].buy.toFixed(2)}</span>
+                        <span className="gold-rate-value">${(goldOunceSources[0].rates['XAU'].buy * calculatorOunces).toFixed(2)}</span>
                       </div>
                       <div className="gold-rate-divider-inline"></div>
                       <div className="gold-rate-item-inline">
                         <span className="gold-rate-label">Satış</span>
-                        <span className="gold-rate-value">${goldOunceSources[0].rates['XAU'].sell.toFixed(2)}</span>
+                        <span className="gold-rate-value">${(goldOunceSources[0].rates['XAU'].sell * calculatorOunces).toFixed(2)}</span>
                       </div>
                     </div>
                   </div>
@@ -239,12 +254,12 @@ function App() {
                     <div className="gold-rates-inline">
                       <div className="gold-rate-item-inline">
                         <span className="gold-rate-label">Alış</span>
-                        <span className="gold-rate-value">${goldOunceSources[1].rates['XAU'].buy.toFixed(2)}</span>
+                        <span className="gold-rate-value">${(goldOunceSources[1].rates['XAU'].buy * calculatorOunces).toFixed(2)}</span>
                       </div>
                       <div className="gold-rate-divider-inline"></div>
                       <div className="gold-rate-item-inline">
                         <span className="gold-rate-label">Satış</span>
-                        <span className="gold-rate-value">${goldOunceSources[1].rates['XAU'].sell.toFixed(2)}</span>
+                        <span className="gold-rate-value">${(goldOunceSources[1].rates['XAU'].sell * calculatorOunces).toFixed(2)}</span>
                       </div>
                     </div>
                   </div>
@@ -253,8 +268,8 @@ function App() {
                 {/* Single Sell Difference */}
                 <div className="gold-spread-combined">
                   {(() => {
-                    const istanbulSell = goldOunceSources[0].rates['XAU'].sell;
-                    const londonSell = goldOunceSources[1].rates['XAU'].sell;
+                    const istanbulSell = goldOunceSources[0].rates['XAU'].sell * calculatorOunces;
+                    const londonSell = goldOunceSources[1].rates['XAU'].sell * calculatorOunces;
                     const sellDiff = (istanbulSell - londonSell).toFixed(2);
                     const sellDiffPercent = ((sellDiff / londonSell) * 100).toFixed(3);
                     const sellDiffTRY = (sellDiff * 31.99).toFixed(2);
