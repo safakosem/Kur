@@ -256,15 +256,23 @@ function App() {
                     const londonSell = goldOunceSources[1].rates['XAU'].sell;
                     const sellDiff = (istanbulSell - londonSell).toFixed(2);
                     const sellDiffPercent = ((sellDiff / londonSell) * 100).toFixed(3);
+                    const sellDiffTRY = (sellDiff * 31.99).toFixed(2);
                     
                     return (
                       <>
-                        <span className="spread-label">Satış Farkı (İstanbul - Londra):</span>
-                        <div className="spread-values">
-                          <span className={`spread-amount ${sellDiff > 0 ? 'positive' : 'negative'}`}>
-                            {sellDiff > 0 ? '+' : ''}${sellDiff}
+                        <div className="spread-label-group">
+                          <span className="spread-label">Satış Farkı (İstanbul - Londra):</span>
+                          <div className="spread-values">
+                            <span className={`spread-amount ${sellDiff > 0 ? 'positive' : 'negative'}`}>
+                              {sellDiff > 0 ? '+' : ''}${sellDiff}
+                            </span>
+                            <span className="spread-percent">({sellDiff > 0 ? '+' : ''}{sellDiffPercent}%)</span>
+                          </div>
+                        </div>
+                        <div className="spread-try">
+                          <span className={`spread-try-amount ${sellDiff > 0 ? 'positive' : 'negative'}`}>
+                            {sellDiff > 0 ? '+' : ''}₺{sellDiffTRY}
                           </span>
-                          <span className="spread-percent">({sellDiff > 0 ? '+' : ''}{sellDiffPercent}%)</span>
                         </div>
                       </>
                     );
