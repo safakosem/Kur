@@ -201,30 +201,73 @@ async def scrape_hakandoviz():
             raise Exception("Failed to load page")
         
         rates = {}
-        rows = soup.find_all('tr')
         
-        for row in rows:
-            cols = row.find_all(['td', 'th'])
+        # This site has data in <li> elements like: USD/TRY41,821442,0130
+        lis = soup.find_all('li')
+        
+        for li in lis:
+            text = li.get_text(strip=True)
             
-            for currency in ['USD', 'EUR', 'GBP', 'CHF', 'XAU']:
-                if len(cols) >= 3:
-                    code = cols[0].get_text(strip=True)
-                    if code == currency or currency in code:
+            # Look for patterns like USD/TRY41,821442,0130
+            for currency in ['USD/TRY', 'EUR/TRY', 'GBP/TRY', 'CHF/TRY']:
+                if currency in text:
+                    # Extract the numbers after the currency code
+                    remaining = text.replace(currency, '')
+                    # Split by comma to get buy and sell
+                    parts = remaining.split(',')
+                    
+                    if len(parts) >= 2:
                         try:
-                            buy_text = cols[1].get_text(strip=True).replace(',', '.')
-                            sell_text = cols[2].get_text(strip=True).replace(',', '.')
-                            buy = float(buy_text)
-                            sell = float(sell_text)
+                            # Reconstruct the numbers with decimal points
+                            buy_str = parts[0] + '.' + parts[1][:4] if len(parts[1]) >= 4 else parts[0]
                             
-                            if buy > 0 and sell > 0 and currency not in rates:
-                                rates[currency] = ExchangeRate(
-                                    currency=currency,
+                            # Find sell price (next number group)
+                            if len(parts[1]) > 4:
+                                sell_part1 = parts[1][4:]
+                                sell_str = sell_part1
+                                if len(parts) > 2:
+                                    sell_str = sell_part1 + '.' + parts[2][:4]
+                            else:
+                                sell_str = parts[1] if len(parts) > 1 else buy_str
+                            
+                            buy = float(buy_str.replace(',', '.'))
+                            sell = float(sell_str.replace(',', '.'))
+                            
+                            curr_code = currency.split('/')[0]  # Get USD, EUR, etc.
+                            
+                            if buy > 0 and sell > 0 and curr_code not in rates:
+                                rates[curr_code] = ExchangeRate(
+                                    currency=curr_code,
                                     buy=buy,
                                     sell=sell
                                 )
-                                logger.info(f"Hakan Doviz - {currency}: Buy={buy}, Sell={sell}")
-                        except (ValueError, AttributeError):
+                                logger.info(f"Hakan Doviz - {curr_code}: Buy={buy}, Sell={sell}")
+                        except (ValueError, AttributeError, IndexError) as e:
+                            logger.error(f"Error parsing {currency} from Hakan: {e}, text: {text}")
                             continue
+            
+            # Look for XAU (gold) - format might be HAS/TRY or XAU/USD
+            if 'HAS/TRY' in text or 'XAU' in text:
+                try:
+                    # Try to extract numbers
+                    import re
+                    numbers = re.findall(r'(\d+\.?\d*),(\d+)', text)
+                    if len(numbers) >= 1:
+                        buy = float(numbers[0][0] + numbers[0][1][:3])
+                        if len(numbers) >= 2:
+                            sell = float(numbers[1][0] + numbers[1][1][:3])
+                        else:
+                            sell = buy * 1.01
+                        
+                        if 'XAU' not in rates and buy > 100:
+                            rates['XAU'] = ExchangeRate(
+                                currency='XAU',
+                                buy=buy,
+                                sell=sell
+                            )
+                            logger.info(f"Hakan Doviz - XAU: Buy={buy}, Sell={sell}")
+                except Exception as e:
+                    logger.error(f"Error parsing gold from Hakan: {e}")
         
         return SourceRates(
             source="Hakan Döviz",
