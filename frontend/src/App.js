@@ -24,6 +24,7 @@ function App() {
   const [refreshing, setRefreshing] = useState(false);
   const [lastUpdate, setLastUpdate] = useState(null);
   const [autoRefresh, setAutoRefresh] = useState(true);
+  const [calculatorOunces, setCalculatorOunces] = useState(1);
 
   const fetchRates = async (isRefresh = false) => {
     try {
