@@ -113,3 +113,7 @@ frontend/dist/win-arm64-unpacked/Döviz
 Karşılaştırma.exe
 frontend/dist/doviz-linux-app.tar.gz
 frontend/dist/doviz-windows-app.tar.gz
+-e 
+# Environment files
+*.env
+*.env.*
