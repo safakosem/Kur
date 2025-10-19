@@ -400,6 +400,124 @@ async def scrape_carsidoviz():
             error_message=str(e)
         )
 
+async def scrape_gold_istanbul():
+    """Scrape XAU/USD rate from Altın Ons İstanbul"""
+    try:
+        url = "https://www.hakandoviz.com/altin/guncel-altin-kurlari"
+        soup = await scrape_with_playwright(url)
+        
+        if not soup:
+            raise Exception("Failed to load page")
+        
+        rates = {}
+        lis = soup.find_all('li')
+        
+        for li in lis:
+            text = li.get_text(strip=True)
+            
+            # Look for "Altın Ons İstanbul"
+            if 'ONS' in text.upper() and 'İSTANBUL' in text.upper():
+                # Format: Altın Ons İstanbul4.501,414.532,67
+                remaining = text.upper().replace('ALTIN ONS İSTANBUL', '').replace('ALTIN ONS ISTANBUL', '')
+                parts = remaining.split(',')
+                
+                if len(parts) >= 3:
+                    try:
+                        # Format: 4.501,414.532,67 -> buy: 4501.41, sell: 4532.67
+                        buy_str = parts[0].replace('.', '') + '.' + parts[1][:2]
+                        sell_str = parts[1][2:].replace('.', '') + '.' + parts[2][:2]
+                        
+                        buy = float(buy_str)
+                        sell = float(sell_str)
+                        
+                        if buy > 100 and sell > 100:
+                            rates['XAU'] = ExchangeRate(
+                                currency='XAU',
+                                buy=buy,
+                                sell=sell
+                            )
+                            logger.info(f"Gold Istanbul - XAU/USD: Buy={buy}, Sell={sell}")
+                    except Exception as e:
+                        logger.error(f"Error parsing Istanbul gold: {e}, text: {text}")
+        
+        return SourceRates(
+            source="Altın Ons İstanbul",
+            url=url,
+            rates=rates,
+            last_updated=datetime.now(timezone.utc).isoformat(),
+            status="success" if rates else "error",
+            error_message="No rates found" if not rates else None
+        )
+    except Exception as e:
+        logger.error(f"Error scraping Istanbul gold: {e}")
+        return SourceRates(
+            source="Altın Ons İstanbul",
+            url="https://www.hakandoviz.com/altin/guncel-altin-kurlari",
+            rates={},
+            last_updated=datetime.now(timezone.utc).isoformat(),
+            status="error",
+            error_message=str(e)
+        )
+
+async def scrape_gold_london():
+    """Scrape XAU/USD rate from Altın Ons Londra"""
+    try:
+        url = "https://www.hakandoviz.com/altin/guncel-altin-kurlari"
+        soup = await scrape_with_playwright(url)
+        
+        if not soup:
+            raise Exception("Failed to load page")
+        
+        rates = {}
+        lis = soup.find_all('li')
+        
+        for li in lis:
+            text = li.get_text(strip=True)
+            
+            # Look for "Altın Ons Londra"
+            if 'ONS' in text.upper() and ('LONDRA' in text.upper() or 'LONDON' in text.upper()):
+                # Format: Altın Ons Londra4.247,104.248,10
+                remaining = text.upper().replace('ALTIN ONS LONDRA', '').replace('ALTIN ONS LONDON', '')
+                parts = remaining.split(',')
+                
+                if len(parts) >= 3:
+                    try:
+                        # Format: 4.247,104.248,10 -> buy: 4247.10, sell: 4248.10
+                        buy_str = parts[0].replace('.', '') + '.' + parts[1][:2]
+                        sell_str = parts[1][2:].replace('.', '') + '.' + parts[2][:2]
+                        
+                        buy = float(buy_str)
+                        sell = float(sell_str)
+                        
+                        if buy > 100 and sell > 100:
+                            rates['XAU'] = ExchangeRate(
+                                currency='XAU',
+                                buy=buy,
+                                sell=sell
+                            )
+                            logger.info(f"Gold London - XAU/USD: Buy={buy}, Sell={sell}")
+                    except Exception as e:
+                        logger.error(f"Error parsing London gold: {e}, text: {text}")
+        
+        return SourceRates(
+            source="Altın Ons Londra",
+            url=url,
+            rates=rates,
+            last_updated=datetime.now(timezone.utc).isoformat(),
+            status="success" if rates else "error",
+            error_message="No rates found" if not rates else None
+        )
+    except Exception as e:
+        logger.error(f"Error scraping London gold: {e}")
+        return SourceRates(
+            source="Altın Ons Londra",
+            url="https://www.hakandoviz.com/altin/guncel-altin-kurlari",
+            rates={},
+            last_updated=datetime.now(timezone.utc).isoformat(),
+            status="error",
+            error_message=str(e)
+        )
+
 # API endpoints
 @api_router.get("/")
 async def root():
