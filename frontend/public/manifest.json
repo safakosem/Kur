@@ -1,0 +1,27 @@
+{
+  "short_name": "Döviz",
+  "name": "Döviz Karşılaştırma - Exchange Rate Comparison",
+  "description": "Real-time currency and gold exchange rate comparison application",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#d4a574",
+  "background_color": "#fdfbf7",
+  "orientation": "portrait-primary",
+  "categories": ["finance", "utilities"],
+  "scope": "/",
+  "prefer_related_applications": false
+}
