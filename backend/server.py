@@ -299,94 +299,81 @@ async def scrape_carsidoviz():
         
         rates = {}
         
-        # Try multiple strategies to find rates
+        # This site might use Turkish names like DOLAR, EURO, etc.
+        currency_mapping = {
+            'DOLAR': 'USD',
+            'USD': 'USD',
+            'EURO': 'EUR',
+            'EUR': 'EUR',
+            'STERLİN': 'GBP',
+            'STERLIN': 'GBP',
+            'GBP': 'GBP',
+            'İSVİÇRE FRANGI': 'CHF',
+            'CHF': 'CHF',
+            'ALTIN': 'XAU',
+            'XAU': 'XAU'
+        }
+        
         # Strategy 1: Look in table rows
         rows = soup.find_all('tr')
         for row in rows:
             cols = row.find_all(['td', 'th'])
             
-            for currency in ['USD', 'EUR', 'GBP', 'CHF', 'XAU']:
-                if len(cols) >= 3:
-                    code = cols[0].get_text(strip=True)
-                    if code == currency or currency in code:
-                        try:
-                            buy_text = cols[1].get_text(strip=True).replace(',', '.')
-                            sell_text = cols[2].get_text(strip=True).replace(',', '.')
-                            buy = float(buy_text)
-                            sell = float(sell_text)
-                            
-                            if buy > 0 and sell > 0 and currency not in rates:
-                                rates[currency] = ExchangeRate(
-                                    currency=currency,
-                                    buy=buy,
-                                    sell=sell
-                                )
-                                logger.info(f"Carsi Doviz - {currency}: Buy={buy}, Sell={sell}")
-                        except (ValueError, AttributeError):
-                            continue
-        
-        # Strategy 2: Look for <li> elements like Hakan Döviz
-        if not rates:
-            lis = soup.find_all('li')
-            for li in lis:
-                text = li.get_text(strip=True)
+            if len(cols) >= 3:
+                code = cols[0].get_text(strip=True).upper()
                 
-                for currency in ['USD/TRY', 'EUR/TRY', 'GBP/TRY', 'CHF/TRY']:
-                    if currency in text:
-                        remaining = text.replace(currency, '')
-                        parts = remaining.split(',')
+                # Check if this row is for a currency we want
+                mapped_currency = None
+                for turkish_name, english_code in currency_mapping.items():
+                    if turkish_name in code:
+                        mapped_currency = english_code
+                        break
+                
+                if mapped_currency and mapped_currency not in rates:
+                    try:
+                        buy_text = cols[1].get_text(strip=True).replace(',', '.').replace(' ', '')
+                        sell_text = cols[2].get_text(strip=True).replace(',', '.').replace(' ', '')
+                        buy = float(buy_text)
+                        sell = float(sell_text)
                         
-                        if len(parts) >= 2:
-                            try:
-                                buy_str = parts[0] + '.' + parts[1][:4] if len(parts[1]) >= 4 else parts[0]
-                                
-                                if len(parts[1]) > 4:
-                                    sell_part1 = parts[1][4:]
-                                    sell_str = sell_part1
-                                    if len(parts) > 2:
-                                        sell_str = sell_part1 + '.' + parts[2][:4]
-                                else:
-                                    sell_str = parts[1] if len(parts) > 1 else buy_str
-                                
-                                buy = float(buy_str.replace(',', '.'))
-                                sell = float(sell_str.replace(',', '.'))
-                                
-                                curr_code = currency.split('/')[0]
-                                
-                                if buy > 0 and sell > 0 and curr_code not in rates:
-                                    rates[curr_code] = ExchangeRate(
-                                        currency=curr_code,
-                                        buy=buy,
-                                        sell=sell
-                                    )
-                                    logger.info(f"Carsi Doviz - {curr_code}: Buy={buy}, Sell={sell}")
-                            except (ValueError, AttributeError, IndexError):
-                                continue
+                        if buy > 0 and sell > 0:
+                            rates[mapped_currency] = ExchangeRate(
+                                currency=mapped_currency,
+                                buy=buy,
+                                sell=sell
+                            )
+                            logger.info(f"Carsi Doviz - {mapped_currency}: Buy={buy}, Sell={sell}")
+                    except (ValueError, AttributeError) as e:
+                        logger.error(f"Error parsing {code}: {e}")
+                        continue
         
-        # Strategy 3: Look in divs with class containing 'price' or 'currency'
+        # Strategy 2: Look in divs
         if not rates:
-            all_divs = soup.find_all('div')
+            all_divs = soup.find_all(['div', 'span', 'p'])
             for div in all_divs:
-                text = div.get_text(strip=True)
-                for currency in ['USD', 'EUR', 'GBP', 'CHF', 'XAU']:
-                    if currency in text:
-                        # Try to extract numbers nearby
-                        import re
-                        numbers = re.findall(r'\d+[.,]\d+', text)
-                        if len(numbers) >= 2:
-                            try:
-                                buy = float(numbers[0].replace(',', '.'))
-                                sell = float(numbers[1].replace(',', '.'))
-                                if buy > 0 and sell > 0 and currency not in rates:
-                                    rates[currency] = ExchangeRate(
-                                        currency=currency,
-                                        buy=buy,
-                                        sell=sell
-                                    )
-                                    logger.info(f"Carsi Doviz - {currency}: Buy={buy}, Sell={sell}")
-                                    break
-                            except (ValueError, IndexError):
-                                continue
+                text = div.get_text(strip=True).upper()
+                
+                for turkish_name, english_code in currency_mapping.items():
+                    if turkish_name in text and english_code not in rates:
+                        # Try to find numbers in the parent or nearby elements
+                        parent = div.parent
+                        if parent:
+                            parent_text = parent.get_text(strip=True)
+                            import re
+                            numbers = re.findall(r'(\d{2}[.,]\d{4})', parent_text)
+                            if len(numbers) >= 2:
+                                try:
+                                    buy = float(numbers[0].replace(',', '.'))
+                                    sell = float(numbers[1].replace(',', '.'))
+                                    if buy > 0 and sell > 0:
+                                        rates[english_code] = ExchangeRate(
+                                            currency=english_code,
+                                            buy=buy,
+                                            sell=sell
+                                        )
+                                        logger.info(f"Carsi Doviz - {english_code}: Buy={buy}, Sell={sell}")
+                                except (ValueError, IndexError):
+                                    continue
         
         return SourceRates(
             source="Çarşı Döviz",
