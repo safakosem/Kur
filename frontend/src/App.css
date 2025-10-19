@@ -54,6 +54,32 @@ body {
   cursor: not-allowed;
 }
 
+.auto-refresh-btn {
+  background: #f5f5f5;
+  color: #666;
+  border: 2px solid #e0e0e0;
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.auto-refresh-btn.active {
+  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+  color: white;
+  border-color: #16a34a;
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.2);
+}
+
+.auto-refresh-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.auto-refresh-btn.active:hover {
+  box-shadow: 0 6px 20px rgba(22, 163, 74, 0.3);
+}
+
 /* Currency Header */
 .currency-header {
   display: flex;
