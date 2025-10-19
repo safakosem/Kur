@@ -445,60 +445,74 @@ async def get_rates():
     try:
         current_time = time.time()
         
-        # Check if cache is still valid
+        # If cache exists and is valid, return it immediately
         if rates_cache['data'] and (current_time - rates_cache['last_updated']) < rates_cache['cache_duration']:
             logger.info("Returning cached rates")
             return rates_cache['data']
         
-        # Cache expired or doesn't exist, fetch new rates
-        logger.info("Fetching fresh rates from websites")
+        # If cache is expired but an update is in progress, return stale cache
+        if rates_cache['updating'] and rates_cache['data']:
+            logger.info("Update in progress, returning stale cache")
+            return rates_cache['data']
         
-        # Run all scrapers concurrently
-        results = await asyncio.gather(
-            scrape_ahlatci(),
-            scrape_haremaltin(),
-            scrape_hakandoviz(),
-            scrape_carsidoviz(),
-            return_exceptions=True
-        )
+        # Mark as updating
+        rates_cache['updating'] = True
         
-        # Handle any exceptions and convert to error responses
-        final_results = []
-        source_names = ["Ahlatcı Döviz", "Harem Altın", "Hakan Döviz", "Çarşı Döviz"]
-        urls = [
-            "https://www.ahlatcidoviz.com.tr",
-            "https://www.haremaltin.com/?lang=en",
-            "https://www.hakandoviz.com/canli-piyasalar",
-            "https://carsidoviz.com"
-        ]
-        
-        for i, result in enumerate(results):
-            if isinstance(result, Exception):
-                logger.error(f"Error from {source_names[i]}: {result}")
-                final_results.append(SourceRates(
-                    source=source_names[i],
-                    url=urls[i],
-                    rates={},
-                    last_updated=datetime.now(timezone.utc).isoformat(),
-                    status="error",
-                    error_message=str(result)
-                ))
-            else:
-                final_results.append(result)
-        
-        response = AllRatesResponse(
-            sources=final_results,
-            timestamp=datetime.now(timezone.utc).isoformat()
-        )
-        
-        # Update cache
-        rates_cache['data'] = response
-        rates_cache['last_updated'] = current_time
-        
-        return response
+        try:
+            # Cache expired or doesn't exist, fetch new rates
+            logger.info("Fetching fresh rates from websites")
+            
+            # Run all scrapers concurrently
+            results = await asyncio.gather(
+                scrape_ahlatci(),
+                scrape_haremaltin(),
+                scrape_hakandoviz(),
+                scrape_carsidoviz(),
+                return_exceptions=True
+            )
+            
+            # Handle any exceptions and convert to error responses
+            final_results = []
+            source_names = ["Ahlatcı Döviz", "Harem Altın", "Hakan Döviz", "Çarşı Döviz"]
+            urls = [
+                "https://www.ahlatcidoviz.com.tr",
+                "https://www.haremaltin.com/?lang=en",
+                "https://www.hakandoviz.com/canli-piyasalar",
+                "https://carsidoviz.com"
+            ]
+            
+            for i, result in enumerate(results):
+                if isinstance(result, Exception):
+                    logger.error(f"Error from {source_names[i]}: {result}")
+                    final_results.append(SourceRates(
+                        source=source_names[i],
+                        url=urls[i],
+                        rates={},
+                        last_updated=datetime.now(timezone.utc).isoformat(),
+                        status="error",
+                        error_message=str(result)
+                    ))
+                else:
+                    final_results.append(result)
+            
+            response = AllRatesResponse(
+                sources=final_results,
+                timestamp=datetime.now(timezone.utc).isoformat()
+            )
+            
+            # Update cache
+            rates_cache['data'] = response
+            rates_cache['last_updated'] = current_time
+            
+            return response
+            
+        finally:
+            # Always clear the updating flag
+            rates_cache['updating'] = False
         
     except Exception as e:
         logger.error(f"Error getting rates: {e}")
+        rates_cache['updating'] = False
         raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.get("/rates/refresh", response_model=AllRatesResponse)
