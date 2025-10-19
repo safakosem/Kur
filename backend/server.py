@@ -561,17 +561,21 @@ async def get_rates():
                 scrape_haremaltin(),
                 scrape_hakandoviz(),
                 scrape_carsidoviz(),
+                scrape_gold_istanbul(),
+                scrape_gold_london(),
                 return_exceptions=True
             )
             
             # Handle any exceptions and convert to error responses
             final_results = []
-            source_names = ["Ahlatcı Döviz", "Harem Altın", "Hakan Döviz", "Çarşı Döviz"]
+            source_names = ["Ahlatcı Döviz", "Harem Altın", "Hakan Döviz", "Çarşı Döviz", "Altın Ons İstanbul", "Altın Ons Londra"]
             urls = [
                 "https://www.ahlatcidoviz.com.tr",
                 "https://www.haremaltin.com/?lang=en",
                 "https://www.hakandoviz.com/canli-piyasalar",
-                "https://carsidoviz.com"
+                "https://carsidoviz.com",
+                "https://www.hakandoviz.com/altin/guncel-altin-kurlari",
+                "https://www.hakandoviz.com/altin/guncel-altin-kurlari"
             ]
             
             for i, result in enumerate(results):
