@@ -117,15 +117,25 @@ function App() {
                 Anlık kur fiyatlarını karşılaştırın
               </p>
             </div>
-            <Button
-              onClick={() => fetchRates(true)}
-              disabled={refreshing}
-              className="refresh-btn"
-              data-testid="refresh-button"
-            >
-              <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-              Yenile
-            </Button>
+            <div className="flex gap-3 items-center">
+              <Button
+                onClick={() => setAutoRefresh(!autoRefresh)}
+                variant={autoRefresh ? "default" : "outline"}
+                className={autoRefresh ? "auto-refresh-btn active" : "auto-refresh-btn"}
+                data-testid="auto-refresh-toggle"
+              >
+                {autoRefresh ? "Otomatik Yenileme Açık" : "Otomatik Yenileme Kapalı"}
+              </Button>
+              <Button
+                onClick={() => fetchRates(true)}
+                disabled={refreshing}
+                className="refresh-btn"
+                data-testid="refresh-button"
+              >
+                <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+                Yenile
+              </Button>
+            </div>
           </div>
           {lastUpdate && (
             <p className="text-sm mt-4 opacity-75" data-testid="last-update">
