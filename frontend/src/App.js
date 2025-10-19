@@ -271,7 +271,7 @@ function App() {
                         </div>
                         <div className="spread-try">
                           <span className={`spread-try-amount ${sellDiff > 0 ? 'positive' : 'negative'}`}>
-                            {sellDiff > 0 ? '+' : ''}₺{sellDiffTRY} TRY
+                            {sellDiff > 0 ? '+' : ''}${sellDiffTRY}
                           </span>
                         </div>
                       </>
