@@ -117,3 +117,5 @@ frontend/dist/doviz-windows-app.tar.gz
 # Environment files
 *.env
 *.env.*
+frontend/public/doviz-linux-app.tar.gz
+frontend/public/doviz-windows-app.tar.gz
