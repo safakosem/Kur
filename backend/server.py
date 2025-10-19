@@ -293,33 +293,39 @@ async def scrape_hakandoviz():
         )
 
 async def scrape_carsidoviz():
-    """Get rates for Çarşı Döviz"""
+    """Scrape rates from Çarşı Döviz"""
     try:
         url = "https://carsidoviz.com"
+        soup = await scrape_with_playwright(url)
         
-        accurate_rates = get_accurate_rates()
-        if not accurate_rates:
-            raise Exception("Could not fetch accurate rates")
+        if not soup:
+            raise Exception("Failed to load page")
         
-        # Most competitive spread (0.22%)
-        spread = 0.0022
         rates = {}
+        rows = soup.find_all('tr')
         
-        for currency in ['USD', 'EUR', 'GBP', 'CHF', 'XAU']:
-            if currency in accurate_rates:
-                base_rate = accurate_rates[currency]
-                if currency == 'XAU':
-                    rates[currency] = ExchangeRate(
-                        currency=currency,
-                        buy=round(base_rate * (1 - spread), 2),
-                        sell=round(base_rate * (1 + spread), 2)
-                    )
-                else:
-                    rates[currency] = ExchangeRate(
-                        currency=currency,
-                        buy=round(base_rate * (1 - spread), 4),
-                        sell=round(base_rate * (1 + spread), 4)
-                    )
+        for row in rows:
+            cols = row.find_all(['td', 'th'])
+            
+            for currency in ['USD', 'EUR', 'GBP', 'CHF', 'XAU']:
+                if len(cols) >= 3:
+                    code = cols[0].get_text(strip=True)
+                    if code == currency or currency in code:
+                        try:
+                            buy_text = cols[1].get_text(strip=True).replace(',', '.')
+                            sell_text = cols[2].get_text(strip=True).replace(',', '.')
+                            buy = float(buy_text)
+                            sell = float(sell_text)
+                            
+                            if buy > 0 and sell > 0 and currency not in rates:
+                                rates[currency] = ExchangeRate(
+                                    currency=currency,
+                                    buy=buy,
+                                    sell=sell
+                                )
+                                logger.info(f"Carsi Doviz - {currency}: Buy={buy}, Sell={sell}")
+                        except (ValueError, AttributeError):
+                            continue
         
         return SourceRates(
             source="Çarşı Döviz",
