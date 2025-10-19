@@ -445,15 +445,24 @@ async def get_rates():
     try:
         current_time = time.time()
         
-        # If cache exists and is valid, return it immediately
+        # If cache exists and is valid, return it with updated timestamp
         if rates_cache['data'] and (current_time - rates_cache['last_updated']) < rates_cache['cache_duration']:
             logger.info("Returning cached rates")
-            return rates_cache['data']
+            # Return cached data but with current timestamp
+            cached_response = rates_cache['data']
+            return AllRatesResponse(
+                sources=cached_response.sources,
+                timestamp=datetime.now(timezone.utc).isoformat()
+            )
         
         # If cache is expired but an update is in progress, return stale cache
         if rates_cache['updating'] and rates_cache['data']:
             logger.info("Update in progress, returning stale cache")
-            return rates_cache['data']
+            cached_response = rates_cache['data']
+            return AllRatesResponse(
+                sources=cached_response.sources,
+                timestamp=datetime.now(timezone.utc).isoformat()
+            )
         
         # Mark as updating
         rates_cache['updating'] = True
