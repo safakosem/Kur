@@ -92,6 +92,10 @@ function App() {
     );
   }
 
+  // Split sources into main currencies and gold ounces
+  const mainSources = rates?.sources?.slice(0, 4) || [];
+  const goldOunceSources = rates?.sources?.slice(4, 6) || [];
+
   return (
     <div className="App" data-testid="app-container">
       {/* Header */}
