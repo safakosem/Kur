@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import "@/App.css";
 import axios from "axios";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, Calculator } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
