@@ -152,13 +152,15 @@ async def scrape_haremaltin():
         for row in rows:
             cols = row.find_all(['td', 'th'])
             
-            for currency in ['USD', 'EUR', 'GBP', 'CHF', 'XAU']:
-                if len(cols) >= 3:
-                    code = cols[0].get_text(strip=True)
-                    if code == currency or currency in code:
+            if len(cols) >= 3:
+                code_text = cols[0].get_text(strip=True)
+                
+                # Check for regular currencies
+                for currency in ['USD', 'EUR', 'GBP', 'CHF']:
+                    if code_text == currency or f"{currency}/TRY" in code_text or currency in code_text:
                         try:
-                            buy_text = cols[1].get_text(strip=True).replace(',', '.')
-                            sell_text = cols[2].get_text(strip=True).replace(',', '.')
+                            buy_text = cols[1].get_text(strip=True).replace(',', '.').replace(' ', '')
+                            sell_text = cols[2].get_text(strip=True).replace(',', '.').replace(' ', '')
                             buy = float(buy_text)
                             sell = float(sell_text)
                             
@@ -171,6 +173,24 @@ async def scrape_haremaltin():
                                 logger.info(f"Harem Altin - {currency}: Buy={buy}, Sell={sell}")
                         except (ValueError, AttributeError):
                             continue
+                
+                # Check for gold - look for "GOLD TRY" or "GRAM GOLD"
+                if ('GOLD TRY' in code_text or 'GOLDTRY' in code_text.replace(' ', '')) and 'XAU' not in rates:
+                    try:
+                        buy_text = cols[1].get_text(strip=True).replace(',', '.').replace(' ', '')
+                        sell_text = cols[2].get_text(strip=True).replace(',', '.').replace(' ', '')
+                        buy = float(buy_text)
+                        sell = float(sell_text)
+                        
+                        if buy > 100 and sell > 100:  # Sanity check - gold should be > 100
+                            rates['XAU'] = ExchangeRate(
+                                currency='XAU',
+                                buy=buy,
+                                sell=sell
+                            )
+                            logger.info(f"Harem Altin - XAU: Buy={buy}, Sell={sell}")
+                    except (ValueError, AttributeError):
+                        continue
         
         return SourceRates(
             source="Harem Altın",
