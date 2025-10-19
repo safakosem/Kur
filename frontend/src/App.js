@@ -58,8 +58,8 @@ function App() {
 
   useEffect(() => {
     fetchRates();
-    // Auto-refresh every 60 seconds
-    const interval = setInterval(() => fetchRates(true), 60000);
+    // Auto-refresh every 1 second
+    const interval = setInterval(() => fetchRates(true), 1000);
     return () => clearInterval(interval);
   }, []);
 
